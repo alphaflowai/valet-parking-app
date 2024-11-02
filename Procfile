@@ -1,1 +1,1 @@
-web: gunicorn "app:create_app()" 
+web: gunicorn --worker-class eventlet -w 1 wsgi:app 
