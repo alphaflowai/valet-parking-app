@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Valet Stations</h1>
+    <a href="{{ url_for('main.new_valet_station') }}" class="btn btn-primary mb-3">Create New Valet Station</a>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Valet Attendant</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for station in stations %}
+                <tr>
+                    <td>{{ station.title }}</td>
+                    <td>{{ station.start_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ station.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>{{ station.valet.username }}</td>
+                    <td>
+                        <a href="{{ url_for('main.edit_valet_station', id=station.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                        <form action="{{ url_for('main.delete_valet_station', id=station.id) }}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this valet station?');">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

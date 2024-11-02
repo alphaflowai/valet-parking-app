@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-preview">
+    <div class="welcome-section">
+        <h1>Welcome back, {{ current_user.full_name }}!</h1>
+        <p class="subtitle">Here's your business at a glance</p>
+    </div>
+
+    <div class="stats-cards">
+        <div class="stat-card">
+            <i class="fas fa-user-tie"></i>
+            <div class="stat-value">{{ valet_attendants|length }}</div>
+            <div class="stat-label">Valet Attendants</div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-parking"></i>
+            <div class="stat-value">{{ stations|length }}</div>
+            <div class="stat-label">Active Stations</div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-car"></i>
+            <div class="stat-value">{{ total_spaces }}</div>
+            <div class="stat-label">Total Spaces</div>
+        </div>
+    </div>
+
+    <div class="main-actions">
+        <a href="{{ url_for('main.manage_stations') }}" class="action-card-link">
+            <div class="action-card">
+                <h2><i class="fas fa-parking"></i> Stations & Spaces</h2>
+                {% if stations %}
+                <div class="stations-list">
+                    {% for station in stations %}
+                    <div class="station-item">
+                        <div class="station-header">
+                            <h3 class="station-name">{{ station.name }}</h3>
+                            <div class="station-metrics">
+                                <span class="station-spaces">
+                                    <i class="fas fa-car"></i> {{ station.spaces.split(',')|length if station.spaces else '0' }} spaces
+                                </span>
+                                <span class="completed-spaces">
+                                    <i class="fas fa-check-circle"></i> {{ station.completed_parkings }} completed
+                                </span>
+                            </div>
+                        </div>
+                        <div class="space-usage-wrapper">
+                            <h4 class="chart-title">Space Usage Statistics</h4>
+                            <div class="space-usage-chart">
+                                {% for space in station.space_usage_stats %}
+                                <div class="space-bar">
+                                    <div class="space-bar-fill" style="height: {{ (space.usage_count / max_usage_count * 100) if max_usage_count > 0 else 0 }}%">
+                                        <span class="space-number">{{ space.number }}</span>
+                                        <span class="usage-count">{{ space.usage_count }}</span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="no-data">No stations added yet</p>
+                {% endif %}
+                <div class="action-button">
+                    Manage Stations & Spaces
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('main.manage_valet_attendants') }}" class="action-card-link">
+            <div class="action-card">
+                <h2><i class="fas fa-user-tie"></i> Valet Attendants</h2>
+                {% if valet_attendants %}
+                <div class="attendants-list">
+                    {% for valet in valet_attendants %}
+                    <div class="attendant-item">
+                        <div class="attendant-info">
+                            <span class="attendant-name">{{ valet.full_name }}</span>
+                            <span class="attendant-station">
+                                {% if valet.assigned_station %}
+                                <i class="fas fa-map-marker-alt"></i> {{ valet.assigned_station.name }}
+                                {% else %}
+                                <i class="fas fa-exclamation-circle"></i> Not Assigned
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="no-data">No valet attendants added yet</p>
+                {% endif %}
+                <div class="action-button">
+                    Manage Valet Attendants
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %}

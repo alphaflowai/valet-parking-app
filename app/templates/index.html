@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if current_user.is_authenticated %}
+        <script>
+            // Redirect to appropriate dashboard based on role
+            {% if current_user.role == 'admin' %}
+                window.location.href = "{{ url_for('main.admin_dashboard') }}";
+            {% elif current_user.role == 'manager' %}
+                window.location.href = "{{ url_for('main.manager_dashboard') }}";
+            {% elif current_user.role == 'valet' %}
+                window.location.href = "{{ url_for('main.valet_dashboard') }}";
+            {% else %}
+                window.location.href = "{{ url_for('main.customer_dashboard') }}";
+            {% endif %}
+        </script>
+    {% else %}
+        <!-- Include landing page content -->
+        {% include 'landing/index.html' %}
+    {% endif %}
+{% endblock %}

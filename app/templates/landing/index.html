@@ -1,0 +1,689 @@
+{% extends "base.html" %}
+{% block title %}ValetFlow - Modern Valet Management Platform{% endblock %}
+
+{% block content %}
+<!-- Navbar with Logo -->
+<nav class="landing-nav">
+    <div class="logo-container">
+        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="ValetFlow Logo" class="logo">
+        <span class="logo-text">ValetFlow</span>
+    </div>
+    <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="{{ url_for('main.login') }}" class="btn-signin">Sign In</a>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-background"></div>
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <span class="gradient-text">Transform</span> Your 
+                <span class="gradient-text">Valet Operations</span>
+            </h1>
+            <p class="hero-subtitle">Streamline your valet service with our intelligent management platform. Boost efficiency and enhance customer experience.</p>
+            <div class="cta-buttons">
+                <a href="{{ url_for('main.signup') }}" class="btn-primary">Start Now</a>
+                <a href="#demo" class="btn-primary btn-secondary">Watch Demo</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="features-section">
+    <div class="container">
+        <h2 class="section-title">Powerful Features for Modern Valet Service</h2>
+        <div class="features-grid">
+            <div class="feature-card glass-morphism">
+                <div class="feature-icon">
+                    <i class="fas fa-parking"></i>
+                </div>
+                <h3>Smart Space Management</h3>
+                <p>Optimize parking space utilization with real-time tracking and AI-powered suggestions</p>
+            </div>
+            <div class="feature-card glass-morphism">
+                <div class="feature-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h3>Mobile-First Platform</h3>
+                <p>Manage operations seamlessly from any device with our responsive platform</p>
+            </div>
+            <div class="feature-card glass-morphism">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Analytics Dashboard</h3>
+                <p>Make data-driven decisions with comprehensive analytics and reporting</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Pricing Section -->
+<section id="pricing" class="pricing-section">
+    <div class="container">
+        <h2 class="section-title">Simple, Transparent Pricing</h2>
+        <div class="pricing-cards">
+            <div class="pricing-card glass-morphism">
+                <div class="pricing-header">
+                    <h3>Starter</h3>
+                    <div class="price">
+                        <span class="currency">$</span>
+                        <span class="amount">60</span>
+                        <span class="period">/week</span>
+                    </div>
+                </div>
+                <ul class="pricing-features">
+                    <li><i class="fas fa-check"></i> 1 Valet Station</li>
+                    <li><i class="fas fa-check"></i> Unlimited Valet Attendants</li>
+                    <li><i class="fas fa-check"></i> Email Support</li>
+                </ul>
+                <a href="{{ url_for('main.signup') }}" class="btn-primary">Get Started</a>
+            </div>
+
+            <div class="pricing-card glass-morphism featured">
+                <div class="pricing-header">
+                    <h3>Professional</h3>
+                    <div class="price">
+                        <span class="currency">$</span>
+                        <span class="amount">125</span>
+                        <span class="period">/week</span>
+                    </div>
+                </div>
+                <ul class="pricing-features">
+                    <li><i class="fas fa-check"></i> 1 Valet Station</li>
+                    <li><i class="fas fa-check"></i> Unlimited Valet Attendants</li>
+                    <li><i class="fas fa-check"></i> Send SMS Links**</li>
+                    <li><i class="fas fa-check"></i> Donation Section for Valet Tips</li>
+                </ul>
+                <p class="pricing-note">**Additional carrier fees apply</p>
+                <a href="{{ url_for('main.signup') }}" class="btn-primary">Get Started</a>
+            </div>
+
+            <div class="pricing-card glass-morphism">
+                <div class="pricing-header">
+                    <h3>Enterprise</h3>
+                    <div class="price">
+                        <span class="currency">$</span>
+                        <span class="amount">5,000</span>
+                        <span class="period">/month</span>
+                    </div>
+                </div>
+                <ul class="pricing-features">
+                    <li><i class="fas fa-check"></i> Unlimited Valet Stations</li>
+                    <li><i class="fas fa-check"></i> Unlimited Valet Attendants</li>
+                    <li><i class="fas fa-check"></i> Send SMS Links**</li>
+                    <li><i class="fas fa-check"></i> Donation Section for Valet Tips</li>
+                    <li><i class="fas fa-check"></i> Custom Integration</li>
+                    <li><i class="fas fa-check"></i> Dedicated Account Manager</li>
+                </ul>
+                <p class="pricing-note">**Additional carrier fees apply</p>
+                <a href="{{ url_for('main.signup') }}" class="btn-primary">Get Started</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section id="team" class="team-section">
+    <div class="container">
+        <h2 class="section-title">Professional Valet Staff</h2>
+        <div class="team-content">
+            <div class="team-text">
+                <h3>Experienced & Professional</h3>
+                <p>Our valets are carefully selected and trained to provide exceptional service. With their professional appearance and courteous demeanor, they represent the premium quality of our valet service.</p>
+                <ul class="team-features">
+                    <li><i class="fas fa-check"></i> Professionally Trained</li>
+                    <li><i class="fas fa-check"></i> Background Checked</li>
+                    <li><i class="fas fa-check"></i> Uniformed Staff</li>
+                    <li><i class="fas fa-check"></i> Customer Service Focused</li>
+                </ul>
+            </div>
+            <div class="team-image">
+                <img src="{{ url_for('static', filename='images/valet-staff.jpg') }}" alt="Professional Valet Staff" class="staff-image">
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+/* Modern CSS styles */
+.landing-nav {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 1rem 2rem;
+    position: fixed;
+    width: 90%;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo {
+    height: 40px;
+}
+
+.logo-text {
+    font-size: 1.5rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-section {
+    position: relative;
+    padding-top: 120px;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+.hero-background {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 55%;
+    height: 100%;
+    background-image: url('{{ url_for('static', filename='images/hero.jpg') }}');
+    background-size: cover;
+    background-position: center;
+    clip-path: polygon(100px 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.hero-background::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.9) 0%,
+        rgba(255, 255, 255, 0.1) 100%
+    );
+}
+
+.hero-content {
+    max-width: 600px;
+    padding: 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-title {
+    font-size: 4rem;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+    color: #1a1a1a;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: #4a5568;
+    margin-bottom: 2.5rem;
+    line-height: 1.6;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .hero-background {
+        width: 100%;
+        opacity: 0.15;
+        clip-path: none;
+    }
+
+    .hero-content {
+        text-align: center;
+        margin: 0 auto;
+    }
+
+    .cta-buttons {
+        justify-content: center;
+    }
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.glass-morphism {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+}
+
+.glow-effect {
+    position: relative;
+}
+
+.glow-effect::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #6366f1, #8b5cf6);
+    border-radius: 24px;
+    z-index: -1;
+    filter: blur(10px);
+    opacity: 0.7;
+}
+
+/* Add more styles for features and pricing sections */
+
+/* Features Section Styles */
+.features-section {
+    padding: 6rem 0;
+    background: radial-gradient(circle at bottom left, rgba(99, 102, 241, 0.05), transparent);
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 4rem;
+    font-size: 2.5rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 0 1rem;
+}
+
+.feature-card {
+    padding: 2rem;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(31, 38, 135, 0.15);
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.feature-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.feature-card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* Pricing Section Styles */
+.pricing-section {
+    padding: 6rem 0;
+    background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.05), transparent);
+}
+
+.pricing-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 2rem 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.pricing-card {
+    padding: 2rem;
+    text-align: center;
+    transition: transform 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.pricing-card.featured {
+    transform: scale(1.05);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.pricing-card.featured::before {
+    content: 'Most Popular';
+    position: absolute;
+    top: 1rem;
+    right: -2rem;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    padding: 0.5rem 3rem;
+    transform: rotate(45deg);
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.pricing-header {
+    margin-bottom: 2rem;
+}
+
+.pricing-header h3 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.price {
+    font-size: 3rem;
+    font-weight: bold;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+}
+
+.price .currency {
+    font-size: 1.5rem;
+    align-self: flex-start;
+}
+
+.price .period {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    align-self: flex-end;
+}
+
+.pricing-features {
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0;
+}
+
+.pricing-features li {
+    padding: 0.8rem 0;
+    color: var(--text-secondary);
+}
+
+.pricing-features i {
+    color: #6366f1;
+    margin-right: 0.5rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .pricing-card.featured {
+        transform: scale(1);
+    }
+    
+    .features-grid,
+    .pricing-cards {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
+    
+    .section-title {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+    }
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+}
+
+.btn-signin {
+    padding: 0.8rem 1.8rem;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    border-radius: 24px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.btn-signin::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #6366f1, #8b5cf6);
+    border-radius: 24px;
+    z-index: -1;
+    filter: blur(10px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.btn-signin:hover {
+    color: white;
+    text-decoration: none;
+}
+
+.btn-signin:hover::before {
+    opacity: 0.7;
+}
+
+.hero-content {
+    max-width: 600px;
+    padding: 2rem;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+}
+
+.hero-subtitle {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.hero-visual {
+    position: relative;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.floating-dashboard {
+    position: relative;
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+
+.dashboard-preview {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+    padding: 0.8rem 1.8rem;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    border-radius: 24px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    border: none;
+    display: inline-block;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #6366f1, #8b5cf6);
+    border-radius: 24px;
+    z-index: -1;
+    filter: blur(10px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.btn-primary:hover {
+    
+    color: white;
+    text-decoration: none;
+}
+
+.btn-primary:hover::before {
+    opacity: 0.7;
+}
+
+.hero-3d {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.floating-dashboard {
+    position: relative;
+    z-index: 2;
+}
+
+.glow-sphere {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, rgba(99, 102, 241, 0.2), transparent 70%);
+    filter: blur(20px);
+    z-index: -1;
+}
+
+.team-section {
+    padding: 6rem 0;
+    background: radial-gradient(circle at bottom right, rgba(99, 102, 241, 0.05), transparent);
+}
+
+.team-content {
+    display: flex;
+    align-items: center;
+    gap: 4rem;
+    margin-top: 3rem;
+}
+
+.team-text {
+    flex: 1;
+}
+
+.team-text h3 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.team-features {
+    list-style: none;
+    padding: 0;
+    margin-top: 2rem;
+}
+
+.team-features li {
+    padding: 0.8rem 0;
+    color: var(--text-secondary);
+}
+
+.team-features i {
+    color: #6366f1;
+    margin-right: 0.5rem;
+}
+
+.team-image {
+    flex: 1;
+}
+
+.staff-image {
+    width: 100%;
+    max-width: 500px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+    .team-content {
+        flex-direction: column-reverse;
+        gap: 2rem;
+    }
+    
+    .team-text {
+        text-align: center;
+    }
+}
+
+.pricing-note {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-top: 1rem;
+    text-align: center;
+    padding: 0 1rem;
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 2px solid #6366f1;
+    color: #6366f1;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: #6366f1;
+    color: white;
+    
+}
+
+.btn-secondary::before {
+    display: none;
+}
+</style>
+{% endblock %} 

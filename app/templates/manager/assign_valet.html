@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Assign Valet to Post</h1>
+    <form method="post">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            <label>Valet: {{ valet.full_name }}</label>
+        </div>
+        <div class="form-group">
+            {{ form.post.label }}
+            {{ form.post(class="form-control") }}
+        </div>
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+{% endblock %}

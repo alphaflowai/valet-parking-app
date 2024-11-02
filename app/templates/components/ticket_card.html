@@ -1,0 +1,110 @@
+{% macro render_ticket_card(session, available_spaces) %}
+<div class="ticket-card" data-session-id="{{ session.id }}" data-url="{{ url_for('main.valet_session_details', session_id=session.id) }}">
+    <div class="ticket-header">
+        <div class="flex items-center gap-3">
+            <span class="status-badge {{ session.status }}">
+                {{ session.status.capitalize() }}
+            </span>
+            <h3 class="ticket-number">
+                #{{ session.ticket_number }}
+            </h3>
+        </div>
+        <button onclick="toggleTicketDetails(this)" class="expand-button text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-100 transition-transform duration-200">
+            <i class="fas fa-chevron-down"></i>
+        </button>
+    </div>
+
+    <div class="ticket-details hidden">
+        <div class="ticket-info-grid p-4 bg-gray-50 dark:bg-gray-800 rounded-lg mt-4 mb-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="info-item">
+                    <p class="text-gray-500 dark:text-gray-400">Parking Space</p>
+                    <p class="font-medium parking-space">{{ session.parking_space or 'Not Assigned' }}</p>
+                </div>
+                <div class="info-item">
+                    <p class="text-gray-500 dark:text-gray-400">Time Parked</p>
+                    <p class="font-medium time-parked" data-session-id="{{ session.id }}">
+                        {{ session.formatted_time_parked }}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="ticket-actions flex flex-col gap-3">
+            {% if session.status == 'parking' or (session.status in ['parked', 'active'] and not session.parking_space) %}
+                <div class="space-assignment-container">
+                    <div class="new-ticket-alert mb-2">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        {% if session.status == 'parking' %}
+                            New ticket - Assign space
+                        {% else %}
+                            Parking space needed
+                        {% endif %}
+                    </div>
+                    
+                    <div class="space-selection-group">
+                        <select class="parking-space-select w-full mb-2 bg-white dark:bg-gray-700 p-2 rounded-lg border border-gray-200 dark:border-gray-600">
+                            <option value="">Select Parking Space</option>
+                            {% if available_spaces and session.id in available_spaces %}
+                                {% for space in available_spaces[session.id] %}
+                                    <option value="{{ space }}">Space {{ space }}</option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                        
+                        <button class="btn action-btn assign-space-btn w-full bg-blue-600 text-white p-2 rounded-lg" 
+                                onclick="handleAssignSpace('{{ session.id }}')"
+                                data-action="assign-space" 
+                                data-session-id="{{ session.id }}">
+                            <i class="fas fa-map-marker-alt mr-2"></i> Assign Space
+                        </button>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if session.status == 'parked' %}
+                <button class="action-btn retrieve-car" 
+                        data-action="retrieving" 
+                        data-session-id="{{ session.id }}">
+                    <i class="fas fa-car mr-2"></i> Retrieve Car
+                </button>
+            {% endif %}
+
+            {% if session.status == 'retrieving' %}
+                <button class="action-btn pickup-car" 
+                        data-action="returning" 
+                        data-session-id="{{ session.id }}">
+                    <i class="fas fa-walking mr-2"></i> Pick Up Car
+                </button>
+            {% endif %}
+
+            {% if session.status == 'returning' %}
+                <button class="action-btn mark-ready" 
+                        data-action="ready" 
+                        data-session-id="{{ session.id }}">
+                    <i class="fas fa-check mr-2"></i> Car is Ready
+                </button>
+            {% endif %}
+
+            {% if session.status == 'ready' %}
+                <button class="action-btn complete-session" 
+                        data-action="complete" 
+                        data-session-id="{{ session.id }}">
+                    <i class="fas fa-flag-checkered mr-2"></i> Complete Session
+                </button>
+            {% endif %}
+
+            <button class="action-btn alert-customer" 
+                    data-action="alert" 
+                    data-session-id="{{ session.id }}">
+                <i class="fas fa-bell mr-2"></i> Alert Customer
+            </button>
+
+            <a href="{{ url_for('main.ticket_details', session_id=session.id) }}" 
+               class="action-btn view-details">
+                <i class="fas fa-info-circle mr-2"></i> View Details
+            </a>
+        </div>
+    </div>
+</div>
+{% endmacro %}

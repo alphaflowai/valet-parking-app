@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{# Disable navbar for login page #}
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        overscroll-behavior: none;
+    }
+
+    body.login-portal {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background-color: var(--background-color);
+        font-family: 'Roboto', sans-serif;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        left: 0;
+    }
+
+    .dashboard-wrapper, .container-fluid {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+    }
+
+    .login-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 400px;
+        padding: 2rem;
+        background-color: var(--card-background);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        margin: 0;
+        z-index: 1000;
+    }
+
+    /* Mobile optimization */
+    @media (max-width: 768px) {
+        .login-container {
+            width: 85%;
+            padding: 1.5rem;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+    }
+
+    .login-container h1 {
+        text-align: center;
+        color: var(--text-color);
+        margin-bottom: 2rem;
+    }
+
+    .input-group {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .input-group input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        background-color: var(--input-background);
+        color: var(--text-color);
+        transition: border-color 0.3s ease;
+    }
+
+    .input-group label {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-color);
+        transition: all 0.3s ease;
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+    .input-group input:focus + label,
+    .input-group input:not(:placeholder-shown) + label {
+        top: -10px;
+        left: 5px;
+        font-size: 0.8em;
+        background-color: var(--card-background);
+        padding: 0 5px;
+        color: var(--primary-color);
+    }
+
+    .form-check {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 1rem 0;
+    }
+
+    .danger-form {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .btn-secondary {
+        background-color: var(--secondary-color);
+        border-color: var(--secondary-color);
+    }
+
+    /* Hide theme toggle and pull-to-refresh */
+    .theme-toggle-wrapper,
+    .ptr-element {
+        display: none !important;
+    }
+</style>
+
+<div class="login-container">
+    <h1>Sign In</h1>
+    <form action="" method="post" novalidate id="loginForm">
+        {{ form.hidden_tag() }}
+        <div class="input-group">
+            {{ form.login(placeholder=" ", class="form-control") }}
+            {{ form.login.label }}
+            <div class="danger-form" style="display: {% if form.login.errors and request.method == 'POST' %}block{% else %}none{% endif %}">
+                {% for error in form.login.errors %}
+                <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="input-group">
+            {{ form.password(placeholder=" ", class="form-control") }}
+            {{ form.password.label }}
+            <div class="danger-form" style="display: {% if form.password.errors and request.method == 'POST' %}block{% else %}none{% endif %}">
+                {% for error in form.password.errors %}
+                <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="danger-form">
+            {% for message in messages %}
+            <span class="text-danger">{{ message }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        <div class="form-check">
+            <div class="remember-form">
+                {{ form.remember_me(class="form-check-input") }}
+                {{ form.remember_me.label(class="form-check-label") }}
+            </div>
+            <div class="clear-form">
+                {{ form.clear(class="btn btn-secondary") }}
+            </div>
+        </div>
+        <div class="submit-form">
+            {{ form.submit(class="btn btn-primary btn-wide") }}
+        </div>
+    </form>
+</div>
+
+<script>
+    // Only prevent page-level touch events
+    document.addEventListener('touchmove', function(e) {
+        if (e.target.closest('.login-container')) {
+            return; // Allow touch events inside login container
+        }
+        e.preventDefault();
+    }, { passive: false });
+
+    // Remove theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.parentElement.remove();
+    }
+
+    const loginForm = document.getElementById('loginForm');
+    const inputGroups = document.querySelectorAll('.input-group');
+    const clearButton = document.querySelector('input[type="submit"][value="Clear"]');
+
+    // Clear form functionality
+    if (clearButton) {
+        clearButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            inputGroups.forEach(group => {
+                const input = group.querySelector('input');
+                input.value = '';
+                const label = group.querySelector('label');
+                label.style.color = '';
+            });
+            document.getElementById('remember_me').checked = false;
+        });
+    }
+
+    // Input focus and blur events
+    inputGroups.forEach(group => {
+        const input = group.querySelector('input');
+        const label = group.querySelector('label');
+
+        input.addEventListener('focus', () => {
+            label.style.color = '#4285f4';
+            label.style.transform = 'translateY(-130%)';
+            label.style.fontSize = '0.8em';
+        });
+
+        input.addEventListener('blur', () => {
+            if (!input.value) {
+                label.style.transform = 'translateY(-50%)';
+                label.style.fontSize = '1em';
+                label.style.color = '';
+            }
+        });
+
+        // Set initial state for filled inputs
+        if (input.value) {
+            label.style.transform = 'translateY(-130%)';
+            label.style.fontSize = '0.8em';
+        }
+    });
+</script>
+{% endblock %}

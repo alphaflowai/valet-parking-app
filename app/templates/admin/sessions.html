@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="dashboard-container">
+        <h1 class="section-title">All Sessions</h1>
+        <div class="session-controls mb-4">
+            <form method="get" class="form-inline">
+                <input type="text" name="search" class="form-control mr-2" placeholder="Search by valet or ticket number" value="{{ request.args.get('search', '') }}">
+                <select name="status" class="form-control mr-2">
+                    <option value="">All Statuses</option>
+                    <option value="parked" {% if request.args.get('status') == 'parked' %}selected{% endif %}>Parked</option>
+                    <option value="completed" {% if request.args.get('status') == 'completed' %}selected{% endif %}>Completed</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </form>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th>Valet</th>
+                        <th>Ticket Number</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in sessions.items %}
+                    <tr class="session-row clickable-card">
+                        <td>{{ session.id }}</td>
+                        <td>{{ session.start_time.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>{{ session.end_time.strftime('%Y-%m-%d %H:%M:%S') if session.end_time else 'Ongoing' }}</td>
+                        <td>{{ session.valet.username if session.valet else 'N/A' }}</td>
+                        <td>{{ session.ticket_number }}</td>
+                        <td><span class="status-badge {{ session.status }}">{{ session.status }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination-container">
+            <ul class="pagination">
+                {% if sessions.has_prev %}
+                    <li class="page-item">
+                        <a href="{{ url_for('main.admin_sessions', page=sessions.prev_num, search=request.args.get('search'), status=request.args.get('status')) }}" class="page-link">Previous</a>
+                    </li>
+                {% endif %}
+                
+                {% for page_num in sessions.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                    {% if page_num %}
+                        {% if page_num == sessions.page %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                        {% else %}
+                            <li class="page-item">
+                                <a href="{{ url_for('main.admin_sessions', page=page_num, search=request.args.get('search'), status=request.args.get('status')) }}" class="page-link">{{ page_num }}</a>
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if sessions.has_next %}
+                    <li class="page-item">
+                        <a href="{{ url_for('main.admin_sessions', page=sessions.next_num, search=request.args.get('search'), status=request.args.get('status')) }}" class="page-link">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+    <style>
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: var(--background-color);
+            border-radius: 8px;
+            box-shadow: var(--card-shadow);
+        }
+        .section-title {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .session-row {
+            cursor: pointer;
+        }
+        .session-row:hover {
+            background-color: var(--hover-color);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 0.25em 0.4em;
+            font-size: 75%;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 0.25rem;
+            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        .status-badge.parked { background-color: var(--secondary-color); color: white; }
+        .status-badge.completed { background-color: #6c757d; color: white; }
+    </style>
+{% endblock %}

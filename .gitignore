@@ -1,0 +1,43 @@
+# Virtual environment
+venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Environment variables
+.env
+
+# Database
+*.db
+
+# IDE specific files
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Instance files
+instance/
+
+# Pytest cache files
+.pytest_cache/
+
+# Coverage files
+.coverage
+htmlcov/
+
+# Distribution files
+dist/
+build/
+
+# Egg info files
+*.egg-info/

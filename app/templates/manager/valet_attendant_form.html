@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>{{ title }}</h1>
+    
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        {% for field in form if field.name not in ['csrf_token', 'submit'] %}
+            <div class="form-group">
+                {{ field.label }}
+                {{ field(class="form-control") }}
+                {% for error in field.errors %}
+                    <span class="text-danger">{{ error }}</span>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        <div class="d-flex justify-content-between mt-3">
+            <a href="{{ url_for('main.manage_valet_attendants') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Valet Attendants
+            </a>
+            {{ form.submit(class="btn btn-primary") }}
+        </div>
+    </form>
+{% endblock %}

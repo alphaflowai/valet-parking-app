@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Session Details</h1>
+    <table class="table">
+        <tr>
+            <th>Session ID</th>
+            <td>{{ session.id }}</td>
+        </tr>
+        <tr>
+            <th>Start Time</th>
+            <td>{{ session.start_time }}</td>
+        </tr>
+        <tr>
+            <th>End Time</th>
+            <td>{{ session.end_time or 'Ongoing' }}</td>
+        </tr>
+        <tr>
+            <th>Status</th>
+            <td>{{ session.status }}</td>
+        </tr>
+        <tr>
+            <th>Valet</th>
+            <td>
+                {% if session.valet %}
+                    {{ session.valet.username }}
+                {% else %}
+                    <form action="{{ url_for('main.manager_assign_valet', session_id=session.id) }}" method="post">
+                        <select name="valet_id" class="form-control d-inline-block w-auto mr-2">
+                            {% for valet in valets %}
+                                <option value="{{ valet.id }}">{{ valet.username }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn btn-primary">Assign Valet</button>
+                    </form>
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th>Customer</th>
+            <td>{{ session.customer.username if session.customer else 'N/A' }}</td>
+        </tr>
+    </table>
+
+    {% if car_details %}
+        <h2>Car Details</h2>
+        <table class="table">
+            <tr>
+                <th>Parking Space</th>
+                <td>{{ car_details.parking_space }}</td>
+            </tr>
+            <tr>
+                <th>Vehicle Type</th>
+                <td>{{ car_details.vehicle_type }}</td>
+            </tr>
+            <tr>
+                <th>Color</th>
+                <td>{{ car_details.color }}</td>
+            </tr>
+            <tr>
+                <th>Make</th>
+                <td>{{ car_details.make }}</td>
+            </tr>
+            <tr>
+                <th>Model</th>
+                <td>{{ car_details.model }}</td>
+            </tr>
+            <tr>
+                <th>License Plate</th>
+                <td>{{ car_details.license_plate }}</td>
+            </tr>
+        </table>
+    {% endif %}
+{% endblock %}

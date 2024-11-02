@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h1 class="display-4 text-primary">{{ session.ticket_number }}</h1>
+            <p>Ticket Number</p>
+        </div>
+        <div class="col-md-6 text-md-right">
+            <h2 class="display-4 text-success">
+                {% if session.status == 'completed' %}
+                    {{ session.closed_parking_space }}
+                {% else %}
+                    {{ session.parking_space or 'Not Assigned' }}
+                {% endif %}
+            </h2>
+            {% if not session.parking_space and session.status != 'completed' %}
+                <a href="{{ url_for('main.valet_dashboard', session_id=session.id) }}" class="btn btn-primary">Assign Parking Space</a>
+            {% endif %}
+            <p>Current Parking Space</p>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="qr-code-container">
+        <div class="card-header">
+            <h5 class="mb-0">Customer Portal QR Code</h5>
+        </div>
+        <div class="card-body text-center">
+            <img src="{{ qr_code }}" alt="QR Code for Customer Portal" class="img-fluid mb-2">
+            <p>Scan this QR code to access the customer portal.</p>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Send Customer Portal Link via SMS</h5>
+        </div>
+        <div class="card-body text-center">
+            <form method="POST" action="{{ url_for('main.send_sms', session_id=session.id) }}">
+                {{ sms_form.hidden_tag() }}
+                <div class="form-group">
+                    {{ sms_form.phone_number.label }}
+                    {{ sms_form.phone_number(class="form-control", placeholder="Enter customer's phone number") }}
+                </div>
+                {{ sms_form.submit(class="btn btn-primary btn-wide mt-3") }}
+            </form>
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <p><strong>Start Time:</strong> {{ get_est_time(session.start_time).strftime('%I:%M %p %m/%d/%Y') }}</p>
+        </div>
+        <div class="col-md-6">
+            <p><strong>Status:</strong> <span class="badge badge-{{ 'success' if session.status == 'parked' else 'warning' }}">{{ session.status.capitalize() }}</span></p>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">Ticket Information</h5>
+            <p><strong>Ticket Number:</strong> {{ session.ticket_number }}</p>
+            <p><strong>Status:</strong> {{ session.status }}</p>
+            <p><strong>Parking Space:</strong> 
+                {% if session.status == 'completed' %}
+                    {{ session.closed_parking_space or 'Closed' }}
+                {% elif not session.parking_space %}
+                    Not Assigned 
+                    {% if available_spaces %}
+                        <a href="{{ url_for('main.valet_park_car', session_id=session.id) }}" class="btn btn-primary">Assign Parking Space</a>
+                    {% else %}
+                        <span class="text-muted">No spaces available</span>
+                    {% endif %}
+                {% else %}
+                    {{ session.parking_space }}
+                {% endif %}
+            </p>
+            <p><strong>Start Time:</strong> {{ get_est_time(session.start_time).strftime('%I:%M %p %m/%d/%Y') }}</p>
+            {% if session.end_time %}
+            <p><strong>End Time:</strong> {{ get_est_time(session.end_time).strftime('%I:%M %p %m/%d/%Y') }}</p>
+            {% endif %}
+            <p><strong>Time Parked:</strong> {{ format_time_parked(session) }}</p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Car Details</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('main.ticket_details', session_id=session.id) }}">
+                {{ car_details_form.hidden_tag() }}
+                
+                <div class="form-group">
+                    {{ car_details_form.vehicle_type.label }}
+                    {{ car_details_form.vehicle_type(class="form-control") }}
+                    {% for error in car_details_form.vehicle_type.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    {{ car_details_form.color.label }}
+                    {{ car_details_form.color(class="form-control") }}
+                    {% for error in car_details_form.color.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    {{ car_details_form.make.label }}
+                    {{ car_details_form.make(class="form-control") }}
+                    {% for error in car_details_form.make.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    {{ car_details_form.model.label }}
+                    {{ car_details_form.model(class="form-control") }}
+                    {% for error in car_details_form.model.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group">
+                    {{ car_details_form.license_plate.label }}
+                    {{ car_details_form.license_plate(class="form-control") }}
+                    {% for error in car_details_form.license_plate.errors %}
+                        <span class="text-danger">{{ error }}</span>
+                    {% endfor %}
+                </div>
+
+                {{ car_details_form.submit(class="btn btn-primary btn-wide mt-3") }}
+            </form>
+        </div>
+    </div>
+
+    
+
+    <a href="{{ url_for('main.valet_dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+
+
+
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .flashing-button {
+        animation: flash 1s linear infinite;
+    }
+    @keyframes flash {
+        50% { opacity: 0.5; }
+    }
+</style>{% endblock %}

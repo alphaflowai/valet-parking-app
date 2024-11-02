@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard-preview.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    {% block extra_css %}{% endblock %}
+
+    <title>{% block title %}Valet Parking App{% endblock %}</title>
+</head>
+<body data-session-id="{{ session.id }}">
+    <div id="pull-to-refresh-indicator" class="ptr-indicator">
+        <span class="ptr-icon"></span>
+        <div class="ptr-text">Pull down to refresh</div>
+    </div>
+    
+    <nav class="navbar navbar-expand-lg navbar-light" {% if request.endpoint == 'main.index' and not current_user.is_authenticated %}style="display: none;"{% endif %}>
+        {% if current_user.is_authenticated and not request.endpoint.endswith('customer_portal') %}
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">Valet Parking</a>
+        {% endif %}
+        
+        {% if request.endpoint.endswith('customer_portal') %}
+        <div class="navbar-nav mx-auto">
+        {% endif %}
+        <div class="theme-toggle-wrapper">
+            <div id="themeToggle" class="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </div>
+        </div>
+        {% if request.endpoint.endswith('customer_portal') %}
+        </div>
+        {% endif %}
+        
+        {% if current_user.is_authenticated and not request.endpoint.endswith('customer_portal') %}
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.index') }}">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.user_profile') }}">Profile</a>
+                </li>
+                {% if current_user.is_valet %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.valet_dashboard') }}">Open Tickets</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.valet_dashboard', status='closed') }}">Closed Tickets</a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.logout') }}">Logout</a>
+                </li>
+            </ul>
+            <div class="navbar-nav">
+                
+                <select id="languageToggle" class="form-control">
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="pt">Português</option>
+                    <option value="da">Dansk</option>
+                    <option value="it">Italiano</option>
+                    <option value="de">Deutsch</option>
+                    
+                    <option value="ko">한국어</option>
+                    <option value="ja">日本語</option>
+                    <option value="zh">简体中文</option>
+                    <option value="pa">ਪੰਜਾਬੀ</option>
+                    <option value="hi">हिंदी</option>
+                    <option value="ar">العربية</option>
+                </select>
+            </div>
+        </div>
+        {% endif %}
+    </nav>
+    
+    <div class="dashboard-wrapper">
+        <div class="container-fluid">
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div class="alert alert-info">
+                {% for message in messages %}
+                <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    {% block scripts %}
+        <!-- Core JavaScript -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+        
+        <!-- Custom JavaScript -->
+        <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+        {% if current_user.is_authenticated %}
+            <script src="{{ url_for('static', filename='js/language.js') }}"></script>
+        {% endif %}
+        
+        {% block extra_js %}{% endblock %}
+    {% endblock %}
+</body>
+</html>

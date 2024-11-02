@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Valet Performance</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Valet Name</th>
+                <th>Total Sessions</th>
+                <th>Average Session Duration</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for valet in valet_performance %}
+            <tr>
+                <td>{{ valet.username }}</td>
+                <td>{{ valet.total_sessions }}</td>
+                <td>{{ valet.avg_duration }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

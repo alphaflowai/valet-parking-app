@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% from "components/ticket_card.html" import render_ticket_card %}
+{% block title %}Valet Dashboard{% endblock %}
+{% block content %}
+
+<div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <!-- Header Section -->
+    <div class="modern-dashboard-header">
+        <div class="header-content">
+            <div class="welcome-section">
+                <p class="welcome-text">Welcome back</p>
+                <a href="{{ url_for('main.user_profile') }}" class="profile-link">{{ current_user.full_name }}</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Station Banner -->
+    <div class="station-banner">
+        <div class="station-info">
+            <i class="fas fa-building"></i>
+            <h2>{{ current_user.assigned_station.name if current_user.assigned_station else 'No Station Assigned' }}</h2>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-container">
+        <div class="stats-section">
+            <div class="stats-grid">
+                <!-- Active Sessions Card -->
+                <div class="stat-card primary">
+                    <i class="fas fa-car-side"></i>
+                    <div class="stat-info">
+                        <span class="stat-value">{{ sessions|selectattr('status', 'in', ['parking', 'parked', 'retrieving', 'returning', 'ready'])|list|length }}</span>
+                        <span class="stat-label">Active Sessions</span>
+                    </div>
+                </div>
+
+                <!-- Spaces Card -->
+                <div class="stat-card secondary">
+                    <i class="fas fa-parking"></i>
+                    <div class="stat-info">
+                        <span class="stat-value">{{ current_user.assigned_station.spaces.split(',')|length if current_user.assigned_station and current_user.assigned_station.spaces else '0' }}</span>
+                        <span class="stat-label">Total Spaces</span>
+                    </div>
+                </div>
+
+                <!-- Completed Today Card -->
+                <div class="stat-card accent">
+                    <i class="fas fa-check-circle"></i>
+                    <div class="stat-info">
+                        <span class="stat-value">{{ completed_today }}</span>
+                        <span class="stat-label">Completed Today</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tickets Section -->
+    <div class="tickets-section">
+        <div class="tickets-header">
+            <div class="tab-container">
+                <a href="{{ url_for('main.valet_dashboard', status='open') }}" 
+                   class="tab-link {% if current_status == 'open' %}active{% endif %}">
+                    Active Tickets
+                </a>
+                <a href="{{ url_for('main.valet_dashboard', status='closed') }}" 
+                   class="tab-link {% if current_status == 'closed' %}active{% endif %}">
+                    Completed
+                </a>
+            </div>
+            <a href="{{ url_for('main.valet_park_car') }}" class="new-ticket-btn">
+                <i class="fas fa-plus"></i>
+                New Ticket
+            </a>
+        </div>
+
+        <div class="tickets-container">
+            {% if sessions %}
+                {% for session in sessions %}
+                    {% if current_status == 'open' and session.status in ['parking', 'parked', 'retrieving', 'returning', 'ready'] %}
+                        {{ render_ticket_card(session, available_spaces) }}
+                    {% elif current_status == 'closed' and session.status == 'completed' %}
+                        {{ render_ticket_card(session, available_spaces) }}
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-ticket-alt"></i>
+                    <p>No {{ current_status }} tickets available</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+// Add currentUserId to the global scope
+const currentUserId = {{ current_user.id }};
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof initializeDashboard === 'function') {
+        initializeDashboard();
+    } else {
+        console.error('Dashboard initialization failed: required functions not found');
+    }
+});
+</script>
+{% endblock %}

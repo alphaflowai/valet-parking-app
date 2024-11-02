@@ -1,0 +1,49 @@
+<div class="auth-container"></div>
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Welcome Back</h2>
+            <p>Manage your valet stations efficiently</p>
+        </div>
+
+        <div class="auth-methods">
+            <!-- Google Sign In -->
+            <button class="btn btn-google" onclick="signInWithGoogle()">
+                <img src="{{ url_for('static', filename='images/google-icon.svg') }}" alt="Google">
+                Continue with Google
+            </button>
+
+            <div class="divider">
+                <span>or</span>
+            </div>
+
+            <!-- Email Sign In Form -->
+            <form class="auth-form" method="POST" action="{{ url_for('main.login') }}">
+                {{ form.hidden_tag() }}
+                <div class="form-group">
+                    <label>Email or Username</label>
+                    {{ form.login(class="form-control") }}
+                    {% if form.login.errors %}
+                        {% for error in form.login.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    {{ form.password(class="form-control") }}
+                    {% if form.password.errors %}
+                        {% for error in form.password.errors %}
+                            <span class="text-danger">{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                {{ form.submit(class="btn btn-primary btn-block") }}
+            </form>
+
+            <div class="auth-links">
+                <a href="{{ url_for('main.signup') }}">Create an account</a>
+                <a href="{{ url_for('main.reset_password_request') }}">Forgot password?</a>
+            </div>
+        </div>
+    </div>
+</div>

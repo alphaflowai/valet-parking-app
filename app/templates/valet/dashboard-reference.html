@@ -1,0 +1,379 @@
+{% extends "base.html" %}
+{% block title %}Valet Dashboard{% endblock %}
+{% block content %}
+<body class="valet-dashboard">
+    <div class="dashboard-container">
+        <header class="modern-dashboard-header">
+            <div class="header-content">
+                <div class="welcome-section">
+                    <h2 class="welcome welcome-text" data-translate="Welcome">Welcome,</h2>
+                    <h1 class="profile-link"><a href="{{ url_for('main.user_profile') }}">{{ current_user.full_name }}</a></h1>
+                </div>
+            </div>
+        </header>
+
+        <div class="station-banner">
+            <div class="station-info">
+                <i class="fas fa-building"></i>
+                <h2>{{ current_user.assigned_station.name if current_user.assigned_station else 'No Station Assigned' }}</h2>
+            </div>
+        </div>
+        <div class="stats-container">
+            <!-- Station Stats -->
+            <div class="stats-section station-stats">
+                <h3>
+                    <i class="fas fa-parking"></i> 
+                    {{ current_user.assigned_station.name if current_user.assigned_station else 'No Station Assigned' }}
+                    ({{ current_user.assigned_station.spaces.split(',')|length if current_user.assigned_station and current_user.assigned_station.spaces else '0' }} Spaces)
+                </h3>
+                <div class="stats-grid">
+                    <div class="stat-card primary">
+                        <i class="fas fa-car-side"></i>
+                        <div class="stat-info">
+                            <span class="stat-value">{{ occupied_spaces }}/{{ total_spaces }}</span>
+                            <span class="stat-label">Spaces Used</span>
+                        </div>
+                    </div>
+                    <div class="stat-card secondary">
+                        <i class="fas fa-check-circle"></i>
+                        <div class="stat-info">
+                            <span class="stat-value">{{ completed_today }}</span>
+                            <span class="stat-label">Today's Sessions</span>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Space Usage Visual -->
+                <div class="space-usage">
+                    <h4>Active Spaces</h4>
+                    <div class="space-grid">
+                        {% if current_user.assigned_station and current_user.assigned_station.spaces %}
+                            {% for space_number in current_user.assigned_station.spaces.split(',') %}
+                                {% set space_occupied = false %}
+                                {% for session in active_sessions %}
+                                    {% if session.parking_space == space_number %}
+                                        {% set space_occupied = true %}
+                                    {% endif %}
+                                {% endfor %}
+                                {% if space_occupied %}
+                                    <div class="space-indicator occupied" title="Space {{ space_number }}">
+                                        <i class="fas fa-car"></i>
+                                        <span>{{ space_number }}</span>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Attendant Stats -->
+            <div class="stats-section attendant-stats">
+                <h3><i class="fas fa-user-tie"></i> Your Activity</h3>
+                <div class="stats-grid">
+                    <div class="stat-card accent">
+                        <i class="fas fa-clock"></i>
+                        <div class="stat-info">
+                            <span class="stat-value">{{ active_tickets }}</span>
+                            <span class="stat-label">Active Tickets</span>
+                        </div>
+                    </div>
+                    <div class="stat-card info">
+                        <i class="fas fa-history"></i>
+                        <div class="stat-info">
+                            <span class="stat-value">{{ completed_tickets }}</span>
+                            <span class="stat-label">Completed Today</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="notifications" class="alert alert-info" style="display: none;"></div>
+
+        {% if current_status == 'open' %}
+            <a href="{{ url_for('main.valet_park_car') }}" class="btn btn-success btn-wide mb-3"><i class="fas fa-car"></i> <h2 data-translate="Park-Vehicle"> Park Vehicle</h2></a>
+        {% endif %}
+
+        <h2 data-translate="Open-Closed-Tickets">{% if current_status == 'open' %}Open{% else %}Closed{% endif %} Tickets</h2>
+
+        {% if sessions %}
+            <div class="dashboard-grid">
+                {% for session in sessions %}
+                    <div class="ticket-card" data-session-id="{{ session.id }}" data-url="{{ url_for('main.update_status', session_id=session.id) }}">
+                        <div class="ticket-header">
+                            <span class="ticket-number">{{ session.ticket_number }}</span>
+                            <span class="ticket-status {{ session.status }}">{{ session.status.capitalize() }}</span>
+                        </div>
+                        <div class="ticket-body">
+                            <p><strong data-translate="Parking-Space">Parking Space:</strong> 
+                                <span class="parking-space">
+                                {% if session.status == 'completed' %}
+                                    {{ session.closed_parking_space }}
+                                {% else %}
+                                    {{ session.parking_space or 'Not assigned' }}
+                                {% endif %}
+                                </span>
+                            </p>
+                            <p><strong data-translate="Start-Time">Start Time:</strong> {{ session.start_time.strftime('%I:%M %p') }}</p>
+                            {% if current_status == 'closed' %}
+                                <p><strong data-translate="End-Time">End Time:</strong> {{ session.end_time.strftime('%I:%M %p') }}</p>
+                            {% endif %}
+                            <p class="parking-duration">
+                                Time Parked: {{ session.formatted_time_parked|default('Time data unavailable') }}
+                            </p>
+                        </div>
+                        <div class="ticket-actions">
+                            {% if current_status == 'open' %}
+                                {% if session.status == 'parking' or (session.status in ['parked', 'active'] and not session.parking_space) %}
+                                    <div class="new-ticket-alert mb-2">
+                                        <i class="fas fa-exclamation-circle"></i> 
+                                        {% if session.status == 'parking' %}
+                                            New ticket - Assign space
+                                        {% else %}
+                                            Parking space needed
+                                        {% endif %}
+                                    </div>
+                                    <form class="assign-space-form mb-2" data-session-id="{{ session.id }}">
+                                        <select class="form-select parking-space-select mb-2" required>
+                                            <option value="" data-translate="Select-Parking-Space">Select Parking Space</option>
+                                            {% if session.id in available_spaces %}
+                                                {% for space in available_spaces[session.id] %}
+                                                    <option value="{{ space }}">{{ space }}</option>
+                                                {% endfor %}
+                                            {% else %}
+                                                <option value="" disabled>No available spaces</option>
+                                            {% endif %}
+                                        </select>
+                                        <button type="submit" class="btn btn-primary action-btn" data-action="assign-space" data-translate="Assign-Space">
+                                            <i class="fas fa-parking"></i> Assign Space
+                                        </button>
+                                    </form>
+                                {% elif session.status == 'parked' and session.parking_space %}
+                                    <button class="btn btn-primary action-btn mb-2" data-action="retrieve-car" data-translate="Retrieve-Car">
+                                        <i class="fas fa-car"></i> Retrieve Car
+                                    </button>
+                                {% elif session.status == 'retrieving' %}
+                                    <button class="btn btn-primary action-btn mb-2" data-action="pick-up-car" data-translate="Pick-Up-Car">
+                                        <i class="fas fa-walking"></i> Pick up Car
+                                    </button>
+                                {% elif session.status == 'returning' %}
+                                    <button class="btn btn-primary action-btn mb-2" data-action="car-ready" data-translate="Car-Ready">
+                                        <i class="fas fa-check"></i> Car is Ready
+                                    </button>
+                                {% elif session.status == 'ready' %}
+                                    <button class="btn btn-primary action-btn mb-2" data-action="complete-session" data-translate="Complete-Session">
+                                        <i class="fas fa-flag-checkered"></i> Complete Session
+                                    </button>
+                                {% endif %}
+
+                                <button class="btn btn-warning alert-customer-btn mb-2" data-session-id="{{ session.id }}" data-translate="Alert-Customer">
+                                    <i class="fas fa-bell"></i> Alert Customer
+                                </button>
+                            {% endif %}
+
+                            <a href="{{ url_for('main.ticket_details', session_id=session.id) }}" class="btn btn-info view-details-btn" data-translate="View-Details">
+                                <i class="fas fa-info-circle"></i> View Details
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p data-translate="No-Tickets">No {% if current_status == 'open' %}open{% else %}closed{% endif %} tickets.</p>
+        {% endif %}
+
+        <div class="d-flex justify-content-end mt-4">
+            {% if current_status == 'open' %}
+                <a href="{{ url_for('main.valet_dashboard', status='closed') }}" class="btn btn-secondary">Show Closed Tickets</a>
+            {% else %}
+                <a href="{{ url_for('main.valet_dashboard', status='open') }}" class="btn btn-secondary">Show Open Tickets</a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+{% endblock %}
+
+{% block extra_js %}
+{{ super() }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script>
+    function scrollToBottom() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+
+    function showNotification(message, type = 'info') {
+        const notifications = document.getElementById('notifications');
+        notifications.textContent = message;
+        notifications.className = `alert alert-${type}`;
+        notifications.style.display = 'block';
+        
+        // Hide after 5 seconds
+        setTimeout(() => {
+            notifications.style.display = 'none';
+        }, 5000);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const socket = io('/valet');
+        
+        socket.on('connect', function() {
+            console.log('Connected to valet namespace');
+            socket.emit('join', { room: 'valet_{{ current_user.id }}' });
+        });
+
+        socket.on('session_update', function(data) {
+            console.log('Received session update:', data);
+            updateTicketCard(data.session_id, data.status);
+        });
+
+        // Add event listeners for all alert customer buttons
+        document.querySelectorAll('.alert-customer-btn').forEach(button => {
+            button.addEventListener('click', handleAlertCustomer);
+        });
+
+        function updateTicketCard(sessionId, status) {
+            const ticketCard = document.querySelector(`.ticket-card[data-session-id="${sessionId}"]`);
+            if (ticketCard) {
+                if (status === 'completed') {
+                    ticketCard.classList.add('fade-out');
+                    setTimeout(() => {
+                        ticketCard.remove();
+                    }, 1000); // Remove after fade animation
+                } else {
+                    const statusElement = ticketCard.querySelector('.status');
+                    const actionButton = ticketCard.querySelector('.action-btn');
+                    
+                    if (statusElement) statusElement.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+                    
+                    if (actionButton) {
+                        actionButton.textContent = getButtonText(status);
+                        actionButton.className = `btn action-btn ${getButtonClass(status)}`;
+                        actionButton.dataset.action = getButtonAction(status);
+                    }
+                }
+            }
+        }
+
+        function getButtonText(status) {
+            const texts = {
+                'parked': 'Retrieve Car',
+                'retrieving': 'Pick up Car',
+                'returning': 'Car is Ready',
+                'ready': 'Complete Session'
+            };
+            return texts[status] || '';
+        }
+
+        function getButtonClass(status) {
+            const classes = {
+                'parked': 'btn-primary',
+                'retrieving': 'btn-warning',
+                'returning': 'btn-info',
+                'ready': 'btn-success'
+            };
+            return classes[status] || 'btn-secondary';
+        }
+
+        function getButtonAction(status) {
+            const actions = {
+                'parked': 'retrieve-car',
+                'retrieving': 'pick-up-car',
+                'returning': 'car-ready',
+                'ready': 'complete-session'
+            };
+            return actions[status] || '';
+        }
+
+        function getCsrfToken() {
+            return '{{ csrf_token }}';
+        }
+
+        // Add form submission handler for assign space
+        document.querySelectorAll('.assign-space-form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const sessionId = this.dataset.sessionId;
+                const parkingSpace = this.querySelector('.parking-space-select').value;
+
+                fetch(`/valet/assign_space/${sessionId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ parking_space: parkingSpace })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update UI
+                        const card = document.querySelector(`.ticket-card[data-session-id="${sessionId}"]`);
+                        if (card) {
+                            card.querySelector('.parking-space').textContent = data.parking_space;
+                            card.querySelector('.ticket-status').textContent = 'Parked';
+                            card.querySelector('.ticket-status').className = 'ticket-status parked';
+                            
+                            // Remove the assign space form and show the retrieve car button
+                            const actionsDiv = card.querySelector('.ticket-actions');
+                            actionsDiv.innerHTML = `
+                                <button class="btn btn-primary action-btn mb-2" data-action="retrieve-car" data-translate="Retrieve-Car">
+                                    <i class="fas fa-car"></i> Retrieve Car
+                                </button>
+                                <button class="btn btn-warning alert-customer-btn mb-2" data-session-id="${sessionId}" data-translate="Alert-Customer">
+                                    <i class="fas fa-bell"></i> Alert Customer
+                                </button>
+                                <a href="/valet/ticket_details/${sessionId}" class="btn btn-info view-details-btn" data-translate="View-Details">
+                                    <i class="fas fa-info-circle"></i> View Details
+                                </a>
+                            `;
+                            
+                            // Add event listener to new alert customer button
+                            actionsDiv.querySelector('.alert-customer-btn').addEventListener('click', handleAlertCustomer);
+                        }
+                        showNotification('Parking space assigned successfully', 'success');
+                    } else {
+                        showNotification(data.message || 'Failed to assign parking space', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Failed to assign parking space', 'error');
+                });
+            });
+        });
+
+        // Add handleAlertCustomer function
+        function handleAlertCustomer(event) {
+            const button = event.currentTarget;
+            const sessionId = button.dataset.sessionId;
+            
+            fetch(`/valet/alert_customer/${sessionId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    showNotification(data.message || 'Customer alerted successfully', 'success');
+                } else {
+                    showNotification(data.message || 'Failed to alert customer', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Failed to alert customer: ' + error.message, 'error');
+            });
+        }
+    });
+</script>
+{% endblock %}
+

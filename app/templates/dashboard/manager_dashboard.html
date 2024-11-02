@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="dashboard-container">
+    <div class="welcomeContainer">
+        <h3 class="fade-out-slow">Welcome</h3>
+        <h2 class="fade-out-pulse">
+            <a href="{{ url_for('main.user_profile') }}" class="profile-link">{{ current_user.full_name }}!</a>
+        </h2>
+    </div>
+
+    <h1 class="dashboard-title">{{ 'Professional' if current_user.is_professional else 'Starter' }} Manager Dashboard</h1>
+
+    <!-- Subscription Status Card -->
+    <div class="dashboard-card subscription-status">
+        <h3>Subscription Status</h3>
+        <p>Plan: {{ current_user.subscription_tier|title }}</p>
+        <p>Stations Available: {{ 'Unlimited' if current_user.is_enterprise else '1' }}</p>
+        <button class="btn btn-outline-primary" onclick="manageSubscription()">
+            Manage Subscription
+        </button>
+    </div>
+
+    <!-- Valet Stations Management -->
+    <a href="{{ url_for('main.manage_stations') }}" class="dashboard-card-link">
+        <div class="dashboard-card">
+            <h3>Valet Stations</h3>
+            <p>
+                {% if current_user.is_enterprise %}
+                Manage multiple valet stations across different locations
+                {% else %}
+                Manage your valet station
+                {% endif %}
+            </p>
+            <span class="btn-dashboard">Manage Station{{ 's' if current_user.is_enterprise }}</span>
+        </div>
+    </a>
+
+    <!-- Valet Attendants Management -->
+    <a href="{{ url_for('main.manage_valet_attendants') }}" class="dashboard-card-link">
+        <div class="dashboard-card">
+            <h3>Valet Attendants</h3>
+            <p>Manage valet attendants and their assignments</p>
+            <ul class="valet-list">
+                {% for valet in valet_attendants[:3] %}
+                <li class="valet-item">
+                    <span>{{ valet.full_name }} - {{ valet.assigned_station.name if valet.assigned_station else 'Not Assigned' }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            <span class="btn-dashboard">Manage Valet Attendants</span>
+        </div>
+    </a>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/station-management.js') }}"></script>
+{% endblock %} 

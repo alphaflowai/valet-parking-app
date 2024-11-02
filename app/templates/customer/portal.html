@@ -1,0 +1,577 @@
+{% extends "base.html" %}
+{% block title %}Customer Portal - Valet Parking{% endblock %}
+{% block content %}
+
+<body class="customer-portal">
+<div class="container mt-4">
+    {% if session %}
+        <div class="info-container">
+            <div class="valet-info">
+                <h1 id="session-valet-station-name" class="display-4 text-primary">{{ session.valet.assigned_station.name if session.valet and session.valet.assigned_station else 'N/A' }}</h1>
+                <p class="text-muted">Valet Station</p>
+            </div>
+            <div class="spacer"></div>
+            <div class="ticket-info">
+                <h1 id="session-ticket-number" class="display-4 text-success">{{ session.ticket_number }}</h1>
+                <p class="text-muted">Ticket Number</p>
+            </div>
+        </div>
+
+        <div id="requestCarSection" {% if session.status in ['retrieving', 'returning', 'ready', 'parking', 'completed'] %}style="display: none;"{% endif %}>
+            <button id="requestCarBtn" class="btn btn-primary btn-lg btn-wide"><i class="fas fa-car"></i> Request My Vehicle</button>
+        </div>
+
+        <div id="refreshableContent">
+            <div id="statusSection" class="status-container">
+                <div class="status-card">
+                    <h2 id="statusHeading" class="status-heading"></h2>
+                    <p id="statusMessage" class="status-message"></p>
+                    <p id="statusTime" class="status-time"></p>
+                </div>
+            </div>
+            <div id="statusSectionDetails" class="status-container">
+                <div class="card-header">
+                    <h6 id="session-status-{{ session.status.capitalize() }}" class="mb-0">
+                        Session Status: <span id="statusBadge" class="badge status-badge {{ session.status }}">{{ session.status.capitalize() }}</span>
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Parking Space:</strong> <span id="parkingSpace">{{ session.parking_space or 'Not Assigned' }}</span></p>
+                    <p><strong>Time Parked:</strong> <span id="parkingDuration" data-session-id="{{ session.id }}">
+                        {% set formatted_time = session.get_formatted_time_parked() %}
+                        {% if formatted_time %}
+                            {{ formatted_time['hours'] }} hours {{ formatted_time['minutes'] }} minutes
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </span></p>
+                    <p><strong>Start Time:</strong> {{ est_start_time.strftime('%I:%M %p') }}</p>
+                    {% if session.status == 'closed' or session.status == 'completed' %}
+                        <p><strong>End Time:</strong> {{ session.end_time.strftime('%I:%M %p') }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        {% if session.status == 'completed' and donation_form %}
+            {% include 'customer/donation_form.html' %}
+        {% endif %}
+    {% else %}
+        <div class="alert alert-danger">
+            Session not found or an error occurred.
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+{{ super() }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const socket = io('/customer');
+        const sessionId = "{{ session.id }}";
+        const requestCarBtn = document.getElementById('requestCarBtn');
+        const parkingDuration = document.getElementById('parkingDuration');
+        const parkingSpace = document.getElementById('parkingSpace');
+        const statusBadge = document.getElementById('statusBadge');
+        const requestCarSection = document.getElementById('requestCarSection');
+        const statusHeading = document.getElementById('statusHeading');
+        const statusMessage = document.getElementById('statusMessage');
+
+        function updateStatus(status) {
+            statusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            statusBadge.className = 'badge status-badge ' + status + ' fade-in';
+            requestCarSection.style.display = status === 'parked' ? 'block' : 'none';
+
+            const statusMessages = {
+                parking: { heading: 'Your car is being parked', message: 'Please wait while we park your vehicle.' },
+                parked: { heading: 'Your car is safely parked', message: 'Click "Request My Vehicle" when you are ready to leave.' },
+                retrieving: { heading: 'Valet Attendant Notified', message: 'A valet has been notified to retrieve your vehicle.' },
+                returning: { heading: 'Your car is being brought to you', message: 'Please wait at the valet stand.' },
+                ready: { heading: 'Your car is ready for pickup', message: 'Please proceed to the valet stand.' },
+                completed: { heading: 'Session completed', message: 'Thank you for using our valet service!' },
+                default: { heading: '', message: '' }
+            };
+
+            const { heading, message } = statusMessages[status] || statusMessages.default;
+            statusHeading.textContent = heading;
+            statusMessage.textContent = message;
+        }
+
+        function showAlert(message) {
+            alert(message);
+        }
+
+        function playNotificationSound() {
+            const audio = new Audio("/static/sounds/notification.mp3");
+            audio.play().catch(error => {
+                console.log("Playback prevented. Waiting for user interaction.");
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-info';
+                alertDiv.innerHTML = `
+                    <p>Playback prevented. Click the button to play the sound.</p>
+                    <button>Play Notification Sound</button>
+                `;
+                alertDiv.querySelector('button').onclick = () => {
+                    audio.play();
+                    alertDiv.remove();
+                };
+                document.querySelector('.container-fluid').insertAdjacentElement('afterbegin', alertDiv);
+            });
+        }
+
+        socket.on('connect', function() {
+            console.log('Connected to customer namespace'); // Tracer
+            socket.emit('join', { session_id: sessionId });
+        });
+
+        socket.on('session_update', function(data) {
+            console.log('Received session update:', data);
+            updateSessionStatus(data.status);
+            updateTimeParked(data.formatted_time_parked);
+            // Update basic UI elements
+            if (data.parking_space) {
+                document.getElementById('parkingSpace').textContent = data.parking_space || 'Not Assigned';
+            }
+            if (data.formatted_time_parked) {
+                document.getElementById('parkingDuration').textContent = data.formatted_time_parked;
+            }
+            
+            // Update status badge and messages
+            document.getElementById('statusBadge').textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+            document.getElementById('statusBadge').className = 'badge status-badge ' + data.status;
+            
+            // Update status heading and message based on status
+            const statusMessages = {
+                parking: { heading: 'Your car is being parked', message: 'Please wait while we park your vehicle.' },
+                parked: { heading: 'Your car is safely parked', message: 'Click "Request My Vehicle" when you are ready to leave.' },
+                retrieving: { heading: 'Valet Attendant Notified', message: 'A valet has been notified to retrieve your vehicle.' },
+                returning: { heading: 'Your car is being brought to you', message: 'Please wait at the valet stand.' },
+                ready: { heading: 'Your car is ready for pickup', message: 'Please proceed to the valet stand.' },
+                completed: { heading: 'Session completed', message: 'Thank you for using our valet service!' }
+            };
+
+            if (statusMessages[data.status]) {
+                document.getElementById('statusHeading').textContent = statusMessages[data.status].heading;
+                document.getElementById('statusMessage').textContent = statusMessages[data.status].message;
+            }
+
+            // Handle donation form for completed status
+            if (data.status === 'completed' && data.donation_form_html) {
+                // Create container for donation form if it doesn't exist
+                let donationContainer = document.getElementById('donationFormContainer');
+                if (!donationContainer) {
+                    donationContainer = document.createElement('div');
+                    donationContainer.id = 'donationFormContainer';
+                    document.querySelector('.container').appendChild(donationContainer);
+                }
+                
+                // Update donation form content
+                donationContainer.innerHTML = data.donation_form_html;
+                
+                // Initialize donation form functionality
+                initDonationForm();
+                
+                // Scroll to donation form
+                setTimeout(scrollToDonationForm, 100);
+            }
+
+            // Handle request car button visibility
+            document.getElementById('requestCarSection').style.display = 
+                data.status === 'parked' ? 'block' : 'none';
+
+            // Show alert if there's a message
+            if (data.message) {
+                showAlert(data.message);
+            }
+
+            // Handle completed status and donation form
+            if (data.status === 'completed' && data.donation_html) {
+                const refreshableContent = document.getElementById('refreshableContent');
+                const donationSection = document.createElement('div');
+                donationSection.innerHTML = data.donation_html;
+                refreshableContent.appendChild(donationSection);
+                
+                if (data.payment_qr) {
+                    displayPaymentQR(data.payment_qr);
+                }
+                if (data.donation_form_html) {
+                    updateDonationForm(data.donation_form_html);
+                }
+                // Initialize donation form functionality
+                initDonationForm();
+                
+                // Scroll to the bottom of the page
+                scrollToBottom();
+            }
+            
+            function displayPaymentQR(qrData) {
+                const qrContainer = document.getElementById('payment-qr-container');
+                if (qrContainer) {
+                    const qrImage = document.createElement('img');
+                    qrImage.src = qrData;
+                    qrImage.alt = 'Payment QR Code';
+                    qrImage.className = 'payment-qr';
+                    
+                    // Clear existing content and add new QR code
+                    qrContainer.innerHTML = '';
+                    qrContainer.appendChild(qrImage);
+                    qrContainer.style.display = 'block';
+                }
+            }
+
+            function updateDonationForm(html) {
+                const donationContainer = document.getElementById('donation-container');
+                if (donationContainer) {
+                    donationContainer.innerHTML = html;
+                    donationContainer.style.display = 'block';
+                }
+            }
+            // Handle 'ready' status specifically
+            if (data.status === 'ready') {
+                playNotificationSound();
+                updateStatus('ready');
+                showAlert('Your car is ready for pickup. Please proceed to the valet stand.');
+            }
+        });
+
+        socket.on('car_being_retrieved', function(data) {
+            console.log('Car being retrieved:', data);
+            updateStatus('returning');
+            showAlert(`Your car is being retrieved by ${data.valet_name}. Please go to the valet stand {{ session.valet.assigned_station.name }}.`);
+        });
+
+        socket.on('car_being_returned', function(data) {
+            console.log('Car being returned:', data);
+            updateStatus('returning');
+            // Remove the alert and just update the UI
+            document.getElementById('statusHeading').textContent = 'Your car is being brought to you';
+            document.getElementById('statusMessage').textContent = 'Please wait at the valet stand.';
+        });
+
+        socket.on('car_picked_up', function(data) {
+            console.log('Car picked up:', data);
+            updateStatus('returning');
+            showAlert(data.message);
+        });
+
+        socket.on('car_ready', function(data) {
+            playNotificationSound();
+            console.log('Car ready:', data);
+            updateStatus('ready');
+            showAlert(data.message);
+        });
+
+        socket.on('valet_alert', function(data) {
+            playNotificationSound();
+            console.log('Valet alert:', data);
+            showAlert(data.message);
+        });
+
+        requestCarBtn.addEventListener('click', () => {
+            fetch('/customer/request_car/{{ session.id }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    updateStatus('retrieving');
+                } else {
+                    showAlert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('An error occurred while requesting your car. Please try again or contact the valet.');
+            });
+        });
+
+        // Update time parked every minute
+        setInterval(() => {
+            fetch(`/get_time_parked/{{ session.id }}`)
+                .then(response => response.json())
+                .then(data => {
+                    parkingDuration.textContent = data.time_parked;
+                });
+        }, 60000);
+
+        // Initial status update
+        updateStatus('{{ session.status }}');
+
+        // Add donation form handling
+        const donationForm = document.getElementById('donationForm');
+        if (donationForm) {
+            const amountInput = document.getElementById('amount');
+            const decreaseBtn = document.getElementById('decreaseAmount');
+            const increaseBtn = document.getElementById('increaseAmount');
+
+            decreaseBtn.addEventListener('click', function() {
+                let currentAmount = parseFloat(amountInput.value);
+                if (currentAmount > 1) {
+                    amountInput.value = (currentAmount - 1).toFixed(2);
+                }
+            });
+
+            increaseBtn.addEventListener('click', function() {
+                let currentAmount = parseFloat(amountInput.value);
+                if (currentAmount < 1000) {
+                    amountInput.value = (currentAmount + 1).toFixed(2);
+                }
+            });
+
+            donationForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const paymentMethod = document.getElementById('payment_method').value;
+                const amount = amountInput.value;
+                let url;
+
+                if (paymentMethod === 'venmo') {
+                    url = `venmo://paycharge?txn=pay&recipients={{ session.valet.venmo_username }}&amount=${amount}&note=Thank%20you%20for%20your%20valet%20service!`;
+                } else if (paymentMethod === 'cashapp') {
+                    url = `https://cash.app/${{ session.valet.cashapp_username }}/${amount}`;
+                }
+
+                if (url) {
+                    window.location.href = url;
+                }
+            });
+        }
+
+        function initDonationForm() {
+            const donationForm = document.getElementById('donationForm');
+            const amountInput = document.getElementById('amount');
+            const decreaseBtn = document.getElementById('decreaseAmount');
+            const increaseBtn = document.getElementById('increaseAmount');
+
+            if (donationForm && amountInput && decreaseBtn && increaseBtn) {
+                decreaseBtn.addEventListener('click', function() {
+                    let currentAmount = parseFloat(amountInput.value);
+                    if (currentAmount > 1) {
+                        amountInput.value = (currentAmount - 1).toFixed(2);
+                    }
+                });
+
+                increaseBtn.addEventListener('click', function() {
+                    let currentAmount = parseFloat(amountInput.value);
+                    if (currentAmount < 1000) {
+                        amountInput.value = (currentAmount + 1).toFixed(2);
+                    }
+                });
+
+                donationForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const paymentMethod = document.getElementById('payment_method').value;
+                    const amount = amountInput.value;
+                    let url;
+
+                    if (paymentMethod === 'venmo') {
+                        url = `venmo://paycharge?txn=pay&recipients={{ session.valet.venmo_username }}&amount=${amount}&note=Thank%20you%20for%20your%20valet%20service!`;
+                    } else if (paymentMethod === 'cashapp') {
+                        url = `https://cash.app/${{ session.valet.cashapp_username }}/${amount}`;
+                    }
+
+                    if (url) {
+                        window.location.href = url;
+                    }
+                });
+            }
+        }
+
+        function scrollToBottom() {
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        function scrollToDonationForm() {
+            const donationForm = document.getElementById('donationForm');
+            if (donationForm) {
+                donationForm.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Check if the status is 'completed' and scroll to the donation form
+        if ('{{ session.status }}' === 'completed') {
+            scrollToDonationForm();
+        }
+        if (refreshableContent && refreshableContent.addEventListener) {
+            refreshableContent.addEventListener('click', function() {
+                const shouldScrollToDonation = '{{ session.status }}' === 'completed';
+                
+                window.location.reload();
+                
+                setTimeout(() => {
+                    if (shouldScrollToDonation) {
+                        scrollToDonationForm();
+                    }
+                }, 500);
+            });
+        }
+        // Add this function to override the default pull-to-refresh behavior
+        function customOnRefresh() {
+            return new Promise((resolve) => {
+                const currentStatus = '{{ session.status }}';
+                const shouldScrollToDonation = currentStatus === 'completed';
+                
+                // Reload the page
+                window.location.reload();
+                
+                // Use setTimeout to ensure the page has reloaded before resolving the promise
+                setTimeout(() => {
+                    if (shouldScrollToDonation) {
+                        scrollToDonationForm();
+                    }
+                    resolve();
+                }, 500);
+            });
+        }
+
+        // Initialize pull-to-refresh with custom onRefresh function
+        const ptr = PullToRefresh.init({
+            mainElement: 'body',
+            onRefresh: customOnRefresh
+        });
+
+        function initializePullToRefresh() {
+            const ptr = PullToRefresh.init({
+                mainElement: 'body',
+                distThreshold: 50,
+                distMax: 100,
+                distReload: 50,
+                instructionsPullToRefresh: 'Pull down to refresh',
+                instructionsReleaseToRefresh: 'Release to refresh',
+                instructionsRefreshing: 'Refreshing',
+                onRefresh: function() {
+                    return new Promise((resolve) => {
+                        const currentStatus = '{{ session.status }}';
+                        const shouldScrollToDonation = currentStatus === 'completed';
+                        
+                        window.location.reload();
+                        
+                        setTimeout(() => {
+                            if (shouldScrollToDonation) {
+                                scrollToDonationForm();
+                            }
+                            resolve();
+                        }, 500);
+                    });
+                }
+            });
+        }
+
+        // Initialize pull-to-refresh
+        initializePullToRefresh();
+
+        // Function to scroll to donation form
+        function scrollToDonationForm() {
+            const donationForm = document.getElementById('donationForm');
+            if (donationForm) {
+                donationForm.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Check if the status is 'completed' and scroll to the donation form on page load
+        if ('{{ session.status }}' === 'completed') {
+            setTimeout(scrollToDonationForm, 100);
+        }
+
+        function updateSessionStatus(status) {
+            const statusBadge = document.getElementById('statusBadge');
+            const statusHeading = document.getElementById('statusHeading');
+            const statusMessage = document.getElementById('statusMessage');
+            const requestCarBtn = document.getElementById('requestCarBtn');
+
+            if (statusBadge) statusBadge.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            
+            const statusMessages = {
+                parking: { heading: 'Your car is being parked', message: 'Please wait while we park your vehicle.' },
+                parked: { heading: 'Your car is safely parked', message: 'Click "Request My Vehicle" when you are ready to leave.' },
+                retrieving: { heading: 'Valet Attendant Notified', message: 'A valet has been notified to retrieve your vehicle.' },
+                returning: { heading: 'Your car is being brought to you', message: 'Please wait at the valet stand.' },
+                ready: { heading: 'Your car is ready for pickup', message: 'Please proceed to the valet stand.' },
+                completed: { heading: 'Session completed', message: 'Thank you for using our valet service!' }
+            };
+
+            if (statusMessages[status]) {
+                if (statusHeading) statusHeading.textContent = statusMessages[status].heading;
+                if (statusMessage) statusMessage.textContent = statusMessages[status].message;
+            }
+
+            // Update button visibility based on status
+            if (requestCarBtn) {
+                requestCarBtn.style.display = status === 'parked' ? 'block' : 'none';
+            }
+        }
+    });
+</script>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const amountInput = document.getElementById('amount');
+            const decreaseBtn = document.getElementById('decreaseAmount');
+            const increaseBtn = document.getElementById('increaseAmount');
+            const donationForm = document.getElementById('donationForm');
+
+            decreaseBtn.addEventListener('click', function() {
+                let currentAmount = parseFloat(amountInput.value);
+                if (currentAmount > 1) {
+                    amountInput.value = (currentAmount - 1).toFixed(2);
+                }
+            });
+
+            increaseBtn.addEventListener('click', function() {
+                let currentAmount = parseFloat(amountInput.value);
+                if (currentAmount < 1000) {
+                    amountInput.value = (currentAmount + 1).toFixed(2);
+                }
+            });
+
+            donationForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const paymentMethod = document.getElementById('payment_method').value;
+                const amount = amountInput.value;
+                let url;
+
+                if (paymentMethod === 'venmo') {
+                    url = `venmo://paycharge?txn=pay&recipients={{ session.valet.venmo_username }}&amount=${amount}&note=Thank%20you%20for%20your%20valet%20service!`;
+                } else if (paymentMethod === 'cashapp') {
+                    url = `https://cash.app/${{ session.valet.cashapp_username }}/${amount}`;
+                }
+
+                if (url) {
+                    window.location.href = url;
+                }
+            });
+        });
+    </script>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Park a Car{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <header class="dashboard-header">
+        <h1 class="dashboard-title">Park New Car</h1>
+    </header>
+    <div class="dashboard-card">
+        {% if qr_code_url %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Customer Portal QR Code</h5>
+            </div>
+            <div class="card-body text-center">
+                <img src="{{ qr_code_url }}" alt="QR Code for Customer Portal" class="img-fluid mb-2">
+                <p>Scan this QR code to access the customer portal.</p>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if current_step == 'ticket' %}
+        <div class="ticketNumberSection">
+            <h2>Enter Ticket Number</h2>
+            <p class="text-muted">Letters, numbers, and dashes.</p>
+            <form method="POST" action="{{ url_for('main.valet_park_car') }}" autocomplete="off">
+                {{ ticket_form.hidden_tag() }}
+                <div class="form-group">
+                    {{ ticket_form.ticket_number.label(class="form-label") }}
+                    {{ ticket_form.ticket_number(class="form-control", autocomplete="off", pattern="[A-Za-z0-9\-]*", title="Ticket number can only contain letters, numbers, and dashes.") }}
+                    {% if ticket_form.ticket_number.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in ticket_form.ticket_number.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="form-group mt-3">
+                    {{ ticket_form.submit(class="btn btn-primary btn-wide") }}
+                </div>
+            </form>
+        </div>
+        {% endif %}
+
+        {% if current_step == 'car_details' %}
+        <div class="carDetailsSection">
+            <h2>Enter Car Details</h2>
+            <p>Ticket Number: {{ session.ticket_number }}</p>
+            <form method="POST" action="{{ url_for('main.valet_park_car') }}" id="carDetailsForm">
+                {{ car_details_form.hidden_tag() }}
+                <input type="hidden" name="session_id" value="{{ session.id }}">
+                <div class="form-group">
+                    {{ car_details_form.vehicle_type.label(class="form-label") }}
+                    {{ car_details_form.vehicle_type(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ car_details_form.color.label(class="form-label") }}
+                    {{ car_details_form.color(class="form-control") }}
+                </div>
+                <div class="form-group">
+                    {{ car_details_form.make.label(class="form-label") }}
+                    {{ car_details_form.make(class="form-control", id="make") }}
+                </div>
+                <div class="form-group" id="model-group">
+                    {{ car_details_form.model.label(class="form-label") }}
+                    {{ car_details_form.model(class="form-control", id="model") }}
+                </div>
+                <div class="form-group">
+                    {{ car_details_form.license_plate.label(class="form-label") }}
+                    {{ car_details_form.license_plate(class="form-control") }}
+                </div>
+                <div class="form-group mt-3">
+                    {{ car_details_form.submit(class="btn btn-primary btn-wide") }}
+                </div>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const carDetailsForm = document.getElementById('carDetailsForm');
+    
+    if (carDetailsForm) {
+        carDetailsForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(carDetailsForm);
+            
+            fetch("{{ url_for('main.valet_park_car') }}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data && data.success) {
+                    showNotification('Car details submitted successfully');
+                    window.location.href = '{{ url_for("main.valet_dashboard") }}';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('An error occurred while submitting car details. Please try again.');
+            });
+        });
+    }
+});
+
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification notification-info';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-info-circle notification-icon"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+</script>
+{% endblock %}

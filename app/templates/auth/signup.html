@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/onboarding.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="signup-container" data-stripe-key="{{ stripe_publishable_key }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="signup-steps">
+        <div class="progress-steps">
+            <div class="progress-step active" data-step="1">1</div>
+            <div class="progress-step" data-step="2">2</div>
+            <div class="progress-step" data-step="3">3</div>
+        </div>
+
+        <div class="step" data-step="1">
+            <h2>Create Your Account</h2>
+            <form id="account-form" class="signup-form">
+                <div class="form-group">
+                    <input type="text" name="first_name" placeholder="First Name" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" name="last_name" placeholder="Last Name" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" name="email" placeholder="Email" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn-primary">Continue</button>
+            </form>
+        </div>
+
+        <div class="step" data-step="2" style="display: none;">
+            <h2>Select Your Plan</h2>
+            <div class="plan-options">
+                <div class="plan-card" data-plan="starter">
+                    <h3>Starter</h3>
+                    <div class="price">$60/week</div>
+                    <ul>
+                        <li>1 Valet Station</li>
+                        <li>Unlimited Valet Attendants</li>
+                        <li>Email Support</li>
+                    </ul>
+                    <button class="btn-select-plan" data-plan="starter">Select Starter</button>
+                </div>
+
+                <div class="plan-card" data-plan="professional">
+                    <h3>Professional</h3>
+                    <div class="price">$125/week</div>
+                    <ul>
+                        <li>1 Valet Station</li>
+                        <li>Unlimited Valet Attendants</li>
+                        <li>SMS Integration</li>
+                        <li>Donation Section for Valet Tips</li>
+                    </ul>
+                    <button class="btn-select-plan" data-plan="professional">Select Professional</button>
+                </div>
+
+                <div class="plan-card" data-plan="enterprise">
+                    <h3>Enterprise</h3>
+                    <div class="price">$5,000/month</div>
+                    <ul>
+                        <li>Unlimited Valet Stations</li>
+                        <li>Unlimited Valet Attendants</li>
+                        <li>SMS Integration</li>
+                        <li>Donation Section for Valet Tips</li>
+                        <li>Custom Integration</li>
+                        <li>Dedicated Support</li>
+                    </ul>
+                    <button class="btn-select-plan" data-plan="enterprise">Select Enterprise</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="step" data-step="3" style="display: none;">
+            <h2>Payment Details</h2>
+            <form id="payment-form">
+                <div id="card-element"></div>
+                <div id="card-errors" role="alert"></div>
+                <button type="submit" class="btn-primary">Complete Signup</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 
+{% block extra_js %}
+<script src="https://js.stripe.com/v3/"></script>
+<script src="{{ url_for('static', filename='js/signup.js') }}"></script>
+{% endblock %}

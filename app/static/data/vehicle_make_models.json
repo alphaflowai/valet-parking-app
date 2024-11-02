@@ -1,0 +1,51 @@
+{
+  "colors": [
+    "White", "Black", "Gray", "Silver", "Blue", "Red", "Brown", "Green", "Orange", "Gold", "Yellow"
+  ],
+  "makes": [
+    "Toyota", "Honda", "Ford", "Chevrolet", "BMW", "Mercedes-Benz", "Audi", "Lexus", "Nissan", "Hyundai",
+    "Kia", "Volkswagen", "Subaru", "Mazda", "Jeep", "Tesla", "Porsche", "Acura", "Infiniti", "Volvo",
+    "Land Rover", "Dodge", "Chrysler", "RAM", "GMC", "Buick", "Cadillac", "Lincoln", "Mini", "Jaguar",
+    "Alfa Romeo", "Fiat", "Genesis", "Maserati", "Ferrari", "Lamborghini", "Bentley", "Rolls-Royce"
+  ],
+  "models": {
+    "Toyota": ["Camry", "Corolla", "RAV4", "Prius", "Highlander", "Tacoma", "4Runner", "Sienna", "Avalon", "Tundra", "C-HR", "Land Cruiser", "Sequoia", "Yaris", "Supra", "86", "Mirai", "Venza"],
+    "Honda": ["Civic", "Accord", "CR-V", "Pilot", "Odyssey", "HR-V", "Fit", "Ridgeline", "Passport", "Insight", "Clarity"],
+    "Ford": ["F-150", "Escape", "Explorer", "Mustang", "Edge", "Ranger", "Expedition", "Fusion", "EcoSport", "Bronco", "Mach-E", "Transit", "GT"],
+    "Chevrolet": ["Silverado", "Equinox", "Malibu", "Traverse", "Tahoe", "Trax", "Blazer", "Camaro", "Colorado", "Suburban", "Spark", "Bolt", "Corvette", "Impala"],
+    "BMW": ["3 Series", "5 Series", "X3", "X5", "7 Series", "4 Series", "X1", "2 Series", "X7", "8 Series", "i3", "i8", "Z4", "X6", "X4", "X2", "M2", "M3", "M4", "M5", "M8"],
+    "Mercedes-Benz": ["C-Class", "E-Class", "GLC", "GLE", "A-Class", "S-Class", "GLA", "CLA", "GLB", "GLS", "G-Class", "CLS", "AMG GT", "SL", "GLC Coupe", "GLE Coupe", "EQC", "Maybach S-Class"],
+    "Audi": ["A4", "Q5", "A3", "Q3", "A6", "Q7", "A5", "Q8", "e-tron", "A7", "A8", "TT", "R8", "RS6", "RS7", "S4", "S5", "S6", "S7", "S8", "SQ5", "RS Q8"],
+    "Lexus": ["RX", "NX", "ES", "IS", "GX", "UX", "LX", "GS", "LS", "RC", "LC", "CT", "RX L"],
+    "Nissan": ["Altima", "Rogue", "Sentra", "Murano", "Kicks", "Pathfinder", "Versa", "Maxima", "Titan", "Armada", "Leaf", "GT-R", "370Z", "Frontier"],
+    "Hyundai": ["Elantra", "Tucson", "Santa Fe", "Sonata", "Kona", "Palisade", "Accent", "Venue", "Veloster", "Ioniq", "Nexo"],
+    "Kia": ["Forte", "Sportage", "Sorento", "Soul", "Telluride", "Optima", "Seltos", "Rio", "Stinger", "Niro", "K5", "Carnival"],
+    "Volkswagen": ["Jetta", "Tiguan", "Atlas", "Passat", "Golf", "Taos", "Arteon", "ID.4", "Atlas Cross Sport", "GTI", "Golf R"],
+    "Subaru": ["Outback", "Forester", "Crosstrek", "Ascent", "Impreza", "Legacy", "WRX", "BRZ"],
+    "Mazda": ["CX-5", "Mazda3", "CX-30", "CX-9", "Mazda6", "MX-5 Miata", "CX-3"],
+    "Jeep": ["Grand Cherokee", "Cherokee", "Wrangler", "Compass", "Renegade", "Gladiator", "Wagoneer", "Grand Wagoneer"],
+    "Tesla": ["Model 3", "Model Y", "Model S", "Model X", "Cybertruck", "Roadster"],
+    "Porsche": ["911", "Cayenne", "Macan", "Panamera", "Taycan", "718 Cayman", "718 Boxster"],
+    "Acura": ["RDX", "MDX", "TLX", "ILX", "NSX", "RLX"],
+    "Infiniti": ["Q50", "QX50", "QX60", "QX80", "Q60", "QX55"],
+    "Volvo": ["XC90", "XC60", "S60", "XC40", "V60", "S90", "V90"],
+    "Land Rover": ["Range Rover", "Range Rover Sport", "Discovery", "Evoque", "Defender", "Velar", "Discovery Sport"],
+    "Dodge": ["Charger", "Challenger", "Durango", "Journey", "Grand Caravan"],
+    "Chrysler": ["Pacifica", "300"],
+    "RAM": ["1500", "2500", "3500", "ProMaster", "ProMaster City"],
+    "GMC": ["Sierra", "Terrain", "Acadia", "Yukon", "Canyon"],
+    "Buick": ["Encore", "Enclave", "Envision", "Regal"],
+    "Cadillac": ["XT5", "Escalade", "CT5", "XT4", "CT4", "XT6"],
+    "Lincoln": ["Corsair", "Nautilus", "Aviator", "Navigator"],
+    "Mini": ["Countryman", "Cooper", "Clubman"],
+    "Jaguar": ["F-Pace", "E-Pace", "I-Pace", "XE", "XF", "F-Type"],
+    "Alfa Romeo": ["Stelvio", "Giulia", "4C"],
+    "Fiat": ["500X", "500L", "124 Spider"],
+    "Genesis": ["G70", "G80", "G90", "GV80"],
+    "Maserati": ["Levante", "Ghibli", "Quattroporte", "MC20"],
+    "Ferrari": ["F8 Tributo", "Roma", "Portofino", "SF90 Stradale"],
+    "Lamborghini": ["Urus", "Huracán", "Aventador"],
+    "Bentley": ["Bentayga", "Continental GT", "Flying Spur"],
+    "Rolls-Royce": ["Cullinan", "Ghost", "Phantom", "Wraith", "Dawn"]
+  }
+}

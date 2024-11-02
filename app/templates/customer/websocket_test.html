@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced WebSocket Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        #messages {
+            height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Enhanced WebSocket Test</h1>
+    <div id="messages"></div>
+    <input type="text" id="messageInput" placeholder="Type a message">
+    <button onclick="sendMessage()">Send</button>
+    <button onclick="testConnection()">Test Connection</button>
+
+    <script>
+        let socket;
+
+        function initializeSocket() {
+            console.log('Initializing socket connection...');
+            addMessage('Initializing socket connection...');
+
+            socket = io();
+
+            socket.on('connect', () => {
+                console.log('Connected to server');
+                addMessage('Connected to server');
+                alert('WebSocket Connected!');
+            });
+
+            socket.on('connect_error', (error) => {
+                console.error('Connection error:', error);
+                addMessage('Connection error: ' + error);
+                alert('WebSocket Connection Error: ' + error);
+            });
+
+            socket.on('message', (data) => {
+                console.log('Received message:', data);
+                addMessage('Received: ' + JSON.stringify(data));
+            });
+
+            // Join a room when the connection is established
+            socket.emit('join', {username: 'TestUser', room: 'test_room'});
+        }
+
+        function sendMessage() {
+            const message = document.getElementById('messageInput').value;
+            console.log('Sending message:', message);
+            socket.emit('message', {message: message, room: 'test_room'});
+            addMessage('Sent: ' + message);
+            document.getElementById('messageInput').value = '';
+        }
+
+        function addMessage(message) {
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML += '<p>' + message + '</p>';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function testConnection() {
+            if (socket && socket.connected) {
+                console.log('Socket is connected');
+                addMessage('Socket is connected');
+                alert('Socket is connected');
+            } else {
+                console.log('Socket is not connected');
+                addMessage('Socket is not connected');
+                alert('Socket is not connected. Attempting to reconnect...');
+                initializeSocket();
+            }
+        }
+
+        // Initialize the socket when the page loads
+        window.onload = initializeSocket;
+    </script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient Definitions -->
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1" />
+      <stop offset="100%" style="stop-color:#8b5cf6" />
+    </linearGradient>
+    
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- V Letter -->
+  <path d="M15 8L25 32L35 8" 
+        stroke="url(#logoGradient)" 
+        stroke-width="4" 
+        fill="none" 
+        stroke-linecap="round"/>
+  
+  <!-- F Letter -->
+  <path d="M45 8V32M45 8H65M45 20H60" 
+        stroke="url(#logoGradient)" 
+        stroke-width="4" 
+        fill="none" 
+        stroke-linecap="round"/>
+  
+  <!-- Flow Element -->
+  <path d="M75 20C85 20 85 8 95 8C105 8 105 20 115 20" 
+        stroke="url(#logoGradient)" 
+        stroke-width="3" 
+        fill="none" 
+        stroke-linecap="round"
+        filter="url(#glow)"/>
+</svg>

@@ -1,0 +1,637 @@
+.dashboard-preview {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 2rem;
+    margin: 2rem auto;
+    max-width: 1200px;
+    box-shadow: 
+        0 8px 32px rgba(31, 38, 135, 0.1),
+        0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.welcome-section {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.welcome-section h1 {
+    font-size: 2.5rem;
+    
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+ 
+}
+
+.subtitle {
+    color: #6b7280;
+    font-size: 1.1rem;
+}
+
+.attendants-list, .stations-list {
+    margin: 1.5rem 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.attendant-item, .station-item {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 0.8rem;
+    transition: transform 0.2s;
+}
+
+.attendant-item:hover, .station-item:hover {
+    transform: translateX(5px);
+}
+
+.attendant-info, .station-info {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.attendant-name, .station-name {
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.attendant-station, .station-spaces {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.action-button {
+    display: inline-block;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.3s;
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.action-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.no-data {
+    text-align: center;
+    color: #6b7280;
+    padding: 2rem;
+    font-style: italic;
+}
+
+.action-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    margin-bottom: 2rem;
+}
+
+.action-card-link:hover {
+    text-decoration: none;
+}
+
+.station-item {
+    background: var(--card-background);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--card-shadow);
+}
+
+.station-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.station-name {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    margin: 0;
+    font-weight: bold;
+}
+
+.station-metrics {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.station-spaces, .completed-spaces {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    background: var(--background-color);
+    white-space: nowrap;
+}
+
+.station-spaces i, .completed-spaces i {
+    margin-right: 0.5rem;
+}
+
+.completed-spaces {
+    color: var(--secondary-color);
+}
+
+.space-usage-wrapper {
+    margin-top: 1rem;
+}
+
+.chart-title {
+    font-size: 1.2rem;
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.space-usage-chart {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: 1rem;
+    height: 200px;
+    align-items: flex-end;
+    padding: 1rem;
+    background: var(--background-color);
+    border-radius: 8px;
+}
+
+.space-bar {
+    height: 100%;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    position: relative;
+}
+
+.space-bar-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: var(--primary-color);
+    border-radius: 4px;
+    transition: height 0.3s ease;
+    min-height: 20px;
+}
+
+.space-number {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+.usage-count {
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .station-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .station-metrics {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .space-usage-chart {
+        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+    }
+}
+
+/* Valet Dashboard specific styles */
+.tickets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.ticket-card {
+    background: var(--card-background);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+}
+
+.ticket-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.ticket-number {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.ticket-status {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.ticket-status.parking { background-color: var(--primary-color); color: white; }
+.ticket-status.parked { background-color: var(--secondary-color); color: white; }
+.ticket-status.retrieving { background-color: #ffc107; color: black; }
+.ticket-status.returning { background-color: #17a2b8; color: white; }
+.ticket-status.ready { background-color: #28a745; color: white; }
+
+.ticket-details {
+    margin: 1rem 0;
+}
+
+.car-info {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.car-info span {
+    padding: 0.25rem 0.5rem;
+    background: var(--background-color);
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.space-info, .time-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+    color: var(--text-color);
+}
+
+.ticket-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.ticket-actions button {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+/* Highlight effect for urgent actions */
+.highlight-card {
+    animation: highlight-pulse 2s infinite;
+}
+
+@keyframes highlight-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
+}
+
+.pulsing-red {
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% { background-color: #dc3545; }
+    50% { background-color: #ff4d5a; }
+    100% { background-color: #dc3545; }
+}
+
+/* Status-specific styles */
+.parked { background-color: var(--secondary-color); }
+.retrieving { background-color: var(--status-retrieving); }
+.returning { background-color: var(--primary-color); }
+.ready { background-color: var(--secondary-color); }
+
+/* Form styles */
+.assign-space-form {
+    width: 100%;
+}
+
+.parking-space-select {
+    margin-bottom: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .tickets-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .ticket-actions {
+        flex-direction: column;
+    }
+}
+
+/* New Parking Button Styles */
+.new-parking-section {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.btn-new-parking {
+    display: inline-block;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-size: 1.2rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 6px rgba(99, 102, 241, 0.2);
+}
+
+.btn-new-parking:hover {
+    text-decoration: none;
+    color: white;
+    box-shadow: 0 6px 8px rgba(99, 102, 241, 0.3);
+}
+
+.btn-new-parking i {
+    margin-right: 0.5rem;
+}
+
+/* Make button full width on mobile */
+@media (max-width: 768px) {
+    .btn-new-parking {
+        display: block;
+        width: 100%;
+        text-align: center;
+    }
+}
+
+.parking-space-select {
+    background-color: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.5rem;
+    width: 100%;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    color: var(--text-color);
+}
+
+.parking-space-select option {
+    padding: 0.5rem;
+    background-color: var(--card-background);
+}
+
+.modern-dashboard-header {
+    background: var(--card-background);
+    border-radius: 16px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--card-shadow);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.station-info {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.station-badge, .valet-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.station-badge {
+    background: linear-gradient(135deg, var(--primary-color), #4dabf7);
+    color: white;
+}
+
+.valet-badge {
+    background: var(--background-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+.stats-section {
+    margin-bottom: 2rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.stat-card {
+    background: var(--card-background);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: var(--card-shadow);
+}
+
+.stat-card i {
+    font-size: 2rem;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #6b7280;
+}
+
+.stat-card.primary i { color: var(--primary-color); background: rgba(52, 152, 219, 0.1); }
+.stat-card.secondary i { color: var(--secondary-color); background: rgba(46, 204, 113, 0.1); }
+.stat-card.accent i { color: #8b5cf6; background: rgba(139, 92, 246, 0.1); }
+.stat-card.info i { color: #14b8a6; background: rgba(20, 184, 166, 0.1); }
+
+.modern-dashboard-header {
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.welcome-section {
+    text-align: left;
+}
+
+.welcome-text {
+    color: var(--text-color);
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.8;
+}
+
+.valet-name {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.station-banner {
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.station-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.station-info i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    opacity: 0.9;
+}
+
+.station-info h2 {
+    font-size: 1.8rem;
+    font-weight: 500;
+    margin: 0;
+    background: linear-gradient(135deg, var(--primary-color), #4dabf7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+}
+
+.stats-container {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stats-section {
+    background: var(--card-background);
+    border-radius: 12px;
+    padding: 1.25rem;
+    box-shadow: var(--card-shadow);
+}
+
+.stats-section h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.space-usage {
+    margin-top: 1rem;
+}
+
+.space-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 0.5rem;
+}
+
+.space-indicator {
+    background: var(--secondary-color);
+    color: white;
+    padding: 0.5rem;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .space-grid {
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+    }
+}
+
+/* Update existing welcome section styles to match */
+.welcome-section {
+    text-align: left;
+    padding: 0 1.5rem;
+}
+
+.welcome-text {
+    color: var(--text-color);
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+    opacity: 0.7;
+}
+
+.profile-link {
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0;
+    background: linear-gradient(135deg, var(--primary-color), #4dabf7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+}

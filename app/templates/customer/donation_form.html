@@ -1,0 +1,19 @@
+<div class="donation-section card">
+    <span class="status-message">Thank Your Valet Attendant</span> <span class="status-heading">{{ session.valet.full_name }}</span>
+    <form id="donationForm" action="{{ url_for('main.process_payment', session_id=session.id) }}" method="post">
+        {{ donation_form.hidden_tag() }}
+        <div class="form-group">
+            {{ donation_form.amount.label }}
+            <div class="input-group">
+                <button type="button" class="btn btn-secondary" id="decreaseAmount">-</button>
+                {{ donation_form.amount(class="form-control", readonly=true, value="5.00") }}
+                <button type="button" class="btn btn-secondary" id="increaseAmount">+</button>
+            </div>
+        </div>
+        <div class="form-group">
+            {{ donation_form.payment_method.label }}
+            {{ donation_form.payment_method(class="form-control") }}
+        </div>
+        {{ donation_form.submit(class="btn btn-primary") }}
+    </form>
+</div>
