@@ -1,16 +1,13 @@
 from functools import wraps
 from flask import render_template, flash, redirect, url_for, request, abort, jsonify, current_app
 from flask_login import login_user, logout_user, current_user
-from app import db
+from app import db, csrf
 import stripe
 from app.models import User
 from app.main.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm
 from app.main.routes import bp
 from urllib.parse import urlparse
 from app.main.routes.email import send_password_reset_email
-from flask_wtf.csrf import CSRFProtect
-
-csrf = CSRFProtect()
 
 def admin_required(f):
     @wraps(f)
@@ -61,7 +58,7 @@ def logout():
     logout_user()
     return redirect(url_for('main.index'))
 
-@bp.route('/signup', methods=['GET', 'POST'])
+@bp.route('/signup', methods=['GET'])
 def signup():
     return render_template('auth/signup.html', 
                          stripe_publishable_key=current_app.config['STRIPE_PUBLISHABLE_KEY'])

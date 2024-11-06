@@ -5,7 +5,6 @@
 
 {% block content %}
 <div class="signup-container" data-stripe-key="{{ stripe_publishable_key }}">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="signup-steps">
         <div class="progress-steps">
             <div class="progress-step active" data-step="1">1</div>
@@ -16,6 +15,7 @@
         <div class="step" data-step="1">
             <h2>Create Your Account</h2>
             <form id="account-form" class="signup-form">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="form-group">
                     <input type="text" name="first_name" placeholder="First Name" required>
                 </div>

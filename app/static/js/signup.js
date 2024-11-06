@@ -32,7 +32,7 @@ async function handleAccountSubmit(e) {
     e.preventDefault();
     const formData = new FormData(e.target);
     accountData = Object.fromEntries(formData);
-    const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     try {
         const response = await fetch('/api/auth/validate-account', {
@@ -78,7 +78,7 @@ async function handlePaymentSubmit(e) {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('input[name="csrf_token"]').value
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
             body: JSON.stringify({
                 account: accountData,

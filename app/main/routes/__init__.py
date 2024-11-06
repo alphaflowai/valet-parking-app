@@ -57,5 +57,8 @@ bp.add_url_rule('/generate_qr/<int:session_id>', 'generate_qr', utility.generate
 # general api routes
 bp.add_url_rule('/api/session/<int:session_id>/time_parked', 'get_time_parked', valet.get_time_parked)
 
+# landing route
+bp.add_url_rule('/landing', 'landing', general.landing)
+
 
 

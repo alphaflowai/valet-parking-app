@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block title %}ValetFlow - Modern Valet Management Platform{% endblock %}
+
+
 
 {% block content %}
 <!-- Navbar with Logo -->
@@ -11,6 +12,11 @@
     <div class="nav-links">
         <a href="#features">Features</a>
         <a href="#pricing">Pricing</a>
+        <div class="theme-toggle-wrapper">
+            <button id="landingThemeToggle" class="theme-toggle" aria-label="Toggle theme">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
         <a href="{{ url_for('main.login') }}" class="btn-signin">Sign In</a>
     </div>
 </nav>
@@ -685,5 +691,23 @@
 .btn-secondary::before {
     display: none;
 }
+
+.nav-links .theme-toggle-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.nav-links .theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+
+.nav-links .theme-toggle:hover {
+    color: var(--primary-color);
+}
 </style>
-{% endblock %} 
+{% endblock %}

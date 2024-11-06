@@ -1,5 +1,13 @@
 {% extends "base.html" %}
 
+{% block title %}
+    {% if not current_user.is_authenticated %}
+        ValetFlow - Modern Valet Management Platform
+    {% else %}
+        {{ super() }}
+    {% endif %}
+{% endblock %}
+
 {% block content %}
     {% if current_user.is_authenticated %}
         <script>
@@ -15,7 +23,8 @@
             {% endif %}
         </script>
     {% else %}
-        <!-- Include landing page content -->
-        {% include 'landing/index.html' %}
+        <script>
+            window.location.href = "{{ url_for('main.landing') }}";
+        </script>
     {% endif %}
 {% endblock %}

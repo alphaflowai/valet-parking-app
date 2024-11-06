@@ -5,34 +5,42 @@ function getCsrfToken() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    let processingAction = false;
     // Theme-related functionality
     const body = document.body;
     const themeToggle = document.getElementById('themeToggle');
+    const landingThemeToggle = document.getElementById('landingThemeToggle');
 
-    // Skip theme initialization on login page
-    if (!body.classList.contains('login-portal') && themeToggle) {
-        // Load saved theme
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        body.classList.toggle('dark-theme', savedTheme === 'dark');
-        updateThemeIcon(savedTheme === 'dark');
-
-        // Theme toggle click handler
-        themeToggle.addEventListener('click', function() {
-            const isDark = body.classList.toggle('dark-theme');
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-            updateThemeIcon(isDark);
-            updateStatusSection(isDark);
+    // Load saved theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    body.classList.toggle('dark-theme', savedTheme === 'dark');
+    
+    // Update both theme toggles
+    function updateThemeIcons(isDark) {
+        [themeToggle, landingThemeToggle].forEach(toggle => {
+            if (toggle) {
+                const icon = toggle.querySelector('i');
+                if (icon) {
+                    icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+                }
+            }
         });
     }
 
-    function updateThemeIcon(isDark) {
-        if (themeToggle) {
-            const icon = themeToggle.querySelector('i');
-            if (icon) {
-                icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-            }
+    // Initial icon update
+    updateThemeIcons(savedTheme === 'dark');
+
+    // Theme toggle click handlers
+    [themeToggle, landingThemeToggle].forEach(toggle => {
+        if (toggle) {
+            toggle.addEventListener('click', function() {
+                const isDark = body.classList.toggle('dark-theme');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                updateThemeIcons(isDark);
+                updateStatusSection(isDark);
+            });
         }
-    }
+    });
 
     function updateStatusSection(isDark) {
         const statusSections = document.querySelectorAll('.status-container, #statusSection, #statusSectionDetails');
@@ -65,7 +73,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Valet dashboard functionality
     if (document.querySelector('.dashboard-container')) {
         const socket = io('/valet');
-        let processingAction = false;
 
         // Handle assign space form submission
         document.querySelectorAll('.assign-space-form').forEach(form => {
