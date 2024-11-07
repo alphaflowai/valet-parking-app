@@ -1,43 +1,63 @@
 # Virtual environment
 venv/
+env/
 
 # Python cache files
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
 # Environment variables
 .env
+.env.local
+.env.*.local
 
 # Database
 *.db
+*.sqlite3
 
 # IDE specific files
 .vscode/
 .idea/
+*.swp
+*.swo
 
 # Logs
 *.log
+logs/
 
 # Temporary files
 *.tmp
-
-# OS generated files
 .DS_Store
 Thumbs.db
 
-# Instance files
-instance/
-
-# Pytest cache files
-.pytest_cache/
-
-# Coverage files
+# Coverage reports
 .coverage
 htmlcov/
+coverage/
 
-# Distribution files
+# Distribution / packaging
 dist/
 build/
-
-# Egg info files
 *.egg-info/
+
+# AWS Amplify
+amplify/
+build/
+dist/
+node_modules/
+
+# Local PostgreSQL data
+postgres-data/
+
+# Add these to your existing .gitignore
+.aws-sam/
+.pytest_cache/
+*.pyc
+__pycache__/
+.env
+.env.*
+!.env.example
+.venv/
+*.db
