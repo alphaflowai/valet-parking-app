@@ -22,7 +22,7 @@ applications:
         build:
           commands:
             - echo "Starting Flask application with Gunicorn"
-            - gunicorn --config gunicorn.conf.py
+            - gunicorn --config gunicorn.conf.py --log-level debug
       artifacts:
         baseDirectory: .
         files:

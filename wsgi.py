@@ -9,7 +9,7 @@ app = create_app()
 socketio.init_app(app, async_mode='eventlet', message_queue=None)
 
 # This is what Gunicorn uses
-application = app
+application = socketio.middleware(app)
 
 if __name__ == '__main__':
     socketio.run(app) 
