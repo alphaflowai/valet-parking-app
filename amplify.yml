@@ -14,7 +14,7 @@ applications:
         build:
           commands:
             - echo "Starting Flask application with Gunicorn"
-            - gunicorn --bind 0.0.0.0:8000 --worker-class eventlet --timeout 30 --workers 1 --log-level debug 'wsgi:application'
+            - gunicorn --bind 0.0.0.0:8000 --worker-class eventlet --timeout 30 --workers 1 --log-level debug 'wsgi:app'
       artifacts:
         baseDirectory: .
         files:
