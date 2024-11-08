@@ -1,10 +1,10 @@
 # Monkey patch must happen before any other imports
 import eventlet
-eventlet.monkey_patch(os=True, select=True, socket=True, thread=True, time=True)
+eventlet.monkey_patch()
 
 # Now we can safely import our application
 from app import create_app, socketio
-from flask import request
+from engineio.async_drivers import eventlet as async_eventlet
 
 app = create_app()
 
@@ -14,19 +14,14 @@ socketio.init_app(app,
                  message_queue=None,
                  cors_allowed_origins="*",
                  ping_timeout=60,
-                 ping_interval=25,
-                 always_connect=True)
+                 ping_interval=25)
 
 # Create an application context for the main thread
 app_ctx = app.app_context()
 app_ctx.push()
 
-# This is what Gunicorn uses - no middleware needed
-application = app
-
-@socketio.on_error_default
-def default_error_handler(e):
-    app.logger.error(f'SocketIO Error: {str(e)}')
+# This is what Gunicorn uses
+wsgi_app = socketio.wsgi_app
 
 if __name__ == '__main__':
     socketio.run(app)
