@@ -11,3 +11,5 @@ errorlog = '-'
 loglevel = 'debug'
 preload_app = True
 worker_connections = 1000
+daemon = False
+forwarded_allow_ips = '*'
