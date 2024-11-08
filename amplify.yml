@@ -12,10 +12,11 @@ applications:
             - echo "Running database migrations"
             - gunicorn --bind 0.0.0.0:8000 app:app
       artifacts:
-        baseDirectory: /
+        baseDirectory: .
         files:
           - '**/*'
       cache:
         paths:
-          - /root/.cache/pip
-    appRoot: /valet-parking-app
+          - node_modules/**/*
+          - .pip-cache
+    appRoot: valet_parking_app
