@@ -18,4 +18,4 @@ applications:
       cache:
         paths:
           - /root/.cache/pip
-    appRoot: /
+    appRoot: /valet-parking-app
