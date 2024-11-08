@@ -7,12 +7,15 @@ applications:
             - pip install -r requirements.txt
         build:
           commands:
-            - echo "Building Flask application"
+            - flask db upgrade
+            - echo "Running database migrations"
+            - python app.py
+            - gunicorn --bind 0.0.0.0:8000 app:app
       artifacts:
-        baseDirectory: /
+        baseDirectory: valet_parking_app
         files:
           - '**/*'
       cache:
         paths:
           - /root/.cache/pip
-    appRoot: valet_parking_app 
+    appRoot: valet_parking_app
