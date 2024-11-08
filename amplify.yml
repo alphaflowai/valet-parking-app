@@ -14,8 +14,7 @@ applications:
         build:
           commands:
             - echo "Starting Flask application"
-            - python -c "from app import create_app; app = create_app()"
-            - gunicorn --bind 0.0.0.0:8000 'app:create_app()'
+            - gunicorn --bind 0.0.0.0:8000 --timeout 30 --workers 2 'app:create_app()'
       artifacts:
         baseDirectory: .
         files:
