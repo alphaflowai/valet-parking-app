@@ -4,7 +4,6 @@ applications:
       phases:
         preBuild:
           commands:
-            - cd valet_parking_app
             - pip install -r requirements.txt
         build:
           commands:
@@ -12,10 +11,10 @@ applications:
             - echo "Running database migrations"
             - python run.py
       artifacts:
-        baseDirectory: .
+        baseDirectory: valet_parking_app
         files:
           - '**/*'
       cache:
         paths:
           - /root/.cache/pip
-    appRoot: .
+    appRoot: valet_parking_app
