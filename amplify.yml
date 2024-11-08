@@ -12,10 +12,12 @@ applications:
             - export PYTHONPATH=$PYTHONPATH:/codebuild/output/src2603305598/src/valet-parking-app
             - mkdir -p config
             - touch config/__init__.py
+            - sleep 10  # Give time for network to stabilize
         build:
           commands:
+            - python -c "from sqlalchemy import create_engine; engine = create_engine('$DATABASE_URL'); engine.connect()"
             - flask db upgrade
-            - echo "Running database migrations"
+            - echo "Database migrations completed"
             - gunicorn --bind 0.0.0.0:8000 app:app
       artifacts:
         baseDirectory: .
