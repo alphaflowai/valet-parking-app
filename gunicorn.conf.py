@@ -1,4 +1,4 @@
-wsgi_app = 'wsgi:wsgi_app'
+wsgi_app = 'wsgi:application'
 bind = '0.0.0.0:8000'
 worker_class = 'eventlet'
 workers = 1

@@ -21,7 +21,7 @@ app_ctx = app.app_context()
 app_ctx.push()
 
 # This is what Gunicorn uses
-wsgi_app = socketio.wsgi_app
+application = app
 
 if __name__ == '__main__':
     socketio.run(app)
