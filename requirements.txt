@@ -15,7 +15,7 @@ psycopg2-binary==2.9.9
 stripe==11.2.0
 twilio==9.2.4
 requests==2.31.0
-urllib3==1.25.4
+urllib3>=1.26.0,<2.1.0
 rich==13.6.0
 aiohappyeyeballs==2.4.0
 aiohttp==3.10.5
