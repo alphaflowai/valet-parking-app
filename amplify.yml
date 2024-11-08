@@ -18,7 +18,13 @@ applications:
               workers = 1
               threads = 1
               timeout = 30
-              keepalive = 2' > gunicorn.conf.py
+              keepalive = 2
+              reload = True
+              accesslog = "-"
+              errorlog = "-"
+              loglevel = "debug"
+              preload_app = True
+              worker_connections = 1000' > gunicorn.conf.py
         build:
           commands:
             - echo "Starting Flask application with Gunicorn"
