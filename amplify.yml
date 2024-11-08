@@ -8,6 +8,7 @@ applications:
             - pip install -r requirements.txt
             - export FLASK_APP=app
             - export FLASK_ENV=production
+            - export DATABASE_URL=postgresql://valetadmin:Ddsaewq1!@valet-parking-db.c30c2kgocbke.us-east-2.rds.amazonaws.com:5432/valet-parking-db
             - export PYTHONPATH=$PYTHONPATH:/codebuild/output/src2603305598/src/valet-parking-app
             - mkdir -p config
             - touch config/__init__.py
