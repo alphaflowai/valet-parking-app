@@ -6,13 +6,18 @@ applications:
           commands:
             - pip install --upgrade pip
             - pip install -r requirements.txt
+            - export FLASK_APP=app
+            - export FLASK_ENV=production
+            - export PYTHONPATH=$PYTHONPATH:/codebuild/output/src2603305598/src/valet-parking-app
+            - mkdir -p config
+            - cp production.py config/production.py
         build:
           commands:
             - flask db upgrade
             - echo "Running database migrations"
             - gunicorn --bind 0.0.0.0:8000 app:app
       artifacts:
-        baseDirectory: valet_parking_app
+        baseDirectory: .
         files:
           - '**/*'
       cache:
