@@ -61,3 +61,7 @@ __pycache__/
 !.env.example
 .venv/
 *.db
+
+# cursor
+.cursorrules
+.cursorignore

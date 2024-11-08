@@ -10,8 +10,7 @@ applications:
             - export FLASK_ENV=production
             - export PYTHONPATH=$PYTHONPATH:/codebuild/output/src2603305598/src/valet-parking-app
             - mkdir -p config
-            - cp config/base.py config/base.py
-            - cp production.py config/production.py
+            - touch config/__init__.py
         build:
           commands:
             - flask db upgrade
