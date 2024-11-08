@@ -24,11 +24,13 @@ applications:
               errorlog = "-"
               loglevel = "debug"
               preload_app = True
-              worker_connections = 1000' > gunicorn.conf.py
+              worker_connections = 1000
+              daemon = False
+              forwarded_allow_ips = "*"' > gunicorn.conf.py
         build:
           commands:
             - echo "Starting Flask application with Gunicorn"
-            - gunicorn --config gunicorn.conf.py --log-level debug
+            - gunicorn --config gunicorn.conf.py --log-level debug --capture-output --enable-stdio-inheritance
       artifacts:
         baseDirectory: .
         files:
