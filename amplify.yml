@@ -1,0 +1,21 @@
+version: 1
+applications:
+  - frontend:
+      phases:
+        preBuild:
+          commands:
+            - pip install --upgrade pip
+            - pip install -r requirements.txt
+        build:
+          commands:
+            - flask db upgrade
+            - echo "Running database migrations"
+            - gunicorn --bind 0.0.0.0:8000 app:app
+      artifacts:
+        baseDirectory: /
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - /root/.cache/pip
+    appRoot: /
