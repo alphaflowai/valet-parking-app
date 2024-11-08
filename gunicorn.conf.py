@@ -8,4 +8,6 @@ keepalive = 2
 reload = True
 accesslog = '-'
 errorlog = '-'
-loglevel = 'debug' 
+loglevel = 'debug'
+preload_app = True
+worker_connections = 1000
