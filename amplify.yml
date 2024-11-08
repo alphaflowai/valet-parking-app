@@ -13,12 +13,8 @@ applications:
             - touch config/__init__.py
         build:
           commands:
-            - echo "Starting Flask application"
-            - python -c "from run import app; app.run(host='0.0.0.0', port=8000)" &
-            - sleep 15
-            - curl -v http://0.0.0.0:8000/ || true
-            - pkill -f "python -c"
-            - gunicorn --bind 0.0.0.0:8000 --timeout 30 --workers 2 --log-level debug --preload 'run:app'
+            - echo "Starting Flask application with Gunicorn"
+            - gunicorn --bind 0.0.0.0:8000 --timeout 30 --workers 2 --log-level debug --preload 'wsgi:app'
       artifacts:
         baseDirectory: .
         files:
