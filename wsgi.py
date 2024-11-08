@@ -21,12 +21,12 @@ socketio.init_app(app,
 app_ctx = app.app_context()
 app_ctx.push()
 
-# This is what Gunicorn uses
-application = socketio.middleware(app)
+# This is what Gunicorn uses - no middleware needed
+application = app
 
 @socketio.on_error_default
 def default_error_handler(e):
     app.logger.error(f'SocketIO Error: {str(e)}')
 
 if __name__ == '__main__':
-    socketio.run(app) 
+    socketio.run(app)
