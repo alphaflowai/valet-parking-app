@@ -8,16 +8,12 @@ applications:
             - pip install -r requirements.txt
             - export FLASK_APP=app
             - export FLASK_ENV=production
-            - export DATABASE_URL=postgresql://valetadmin:Ddsaewq1!@valet-parking-db.c30c2kgocbke.us-east-2.rds.amazonaws.com:5432/valet-parking-db
             - export PYTHONPATH=$PYTHONPATH:/codebuild/output/src2603305598/src/valet-parking-app
             - mkdir -p config
             - touch config/__init__.py
-            - sleep 10  # Give time for network to stabilize
         build:
           commands:
-            - python -c "from sqlalchemy import create_engine; engine = create_engine('$DATABASE_URL'); engine.connect()"
-            - flask db upgrade
-            - echo "Database migrations completed"
+            - echo "Skipping database operations during build"
             - gunicorn --bind 0.0.0.0:8000 app:app
       artifacts:
         baseDirectory: .
