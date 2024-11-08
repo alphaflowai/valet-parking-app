@@ -4,18 +4,18 @@ applications:
       phases:
         preBuild:
           commands:
+            - cd valet_parking_app
             - pip install -r requirements.txt
         build:
           commands:
             - flask db upgrade
             - echo "Running database migrations"
-            - python app.py
-            - gunicorn --bind 0.0.0.0:8000 app:app
+            - python run.py
       artifacts:
-        baseDirectory: valet_parking_app
+        baseDirectory: .
         files:
           - '**/*'
       cache:
         paths:
           - /root/.cache/pip
-    appRoot: valet_parking_app
+    appRoot: .
