@@ -11,10 +11,11 @@ applications:
             - export PYTHONPATH=$PYTHONPATH:/codebuild/output/src2603305598/src/valet-parking-app
             - mkdir -p config
             - touch config/__init__.py
+            - echo "wsgi_app = 'wsgi:application'" > gunicorn.conf.py
         build:
           commands:
             - echo "Starting Flask application with Gunicorn"
-            - gunicorn --bind 0.0.0.0:8000 --worker-class eventlet --timeout 30 --workers 1 --log-level debug 'wsgi:application'
+            - gunicorn --config gunicorn.conf.py --bind 0.0.0.0:8000 --worker-class eventlet --timeout 30 --workers 1 --log-level debug
       artifacts:
         baseDirectory: .
         files:

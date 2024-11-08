@@ -7,6 +7,8 @@ from app import create_app, socketio
 
 app = create_app()
 socketio.init_app(app, async_mode='eventlet', message_queue=None)
+
+# This is what Gunicorn uses
 application = app
 
 if __name__ == '__main__':
