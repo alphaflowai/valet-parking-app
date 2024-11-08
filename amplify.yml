@@ -14,11 +14,11 @@ applications:
         build:
           commands:
             - echo "Starting Flask application"
-            - python run.py &
-            - sleep 5
-            - curl http://localhost:5000/
-            - pkill -f "python run.py"
-            - gunicorn --bind 0.0.0.0:8000 --timeout 15 --workers 2 --log-level debug 'run:app'
+            - python -c "from run import app; app.run(host='0.0.0.0', port=8000)" &
+            - sleep 10
+            - curl http://0.0.0.0:8000/
+            - pkill -f python
+            - gunicorn --bind 0.0.0.0:8000 --timeout 30 --workers 2 --log-level debug 'run:app'
       artifacts:
         baseDirectory: .
         files:
