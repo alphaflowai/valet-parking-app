@@ -1,10 +1,9 @@
 # Monkey patch must happen before any other imports
 import eventlet
-eventlet.monkey_patch()
+eventlet.monkey_patch(all=True, socket=True, time=True, select=True, os=True)
 
 # Now we can safely import our application
 from app import create_app, socketio
-from engineio.async_drivers import eventlet as async_eventlet
 
 app = create_app()
 
@@ -16,12 +15,9 @@ socketio.init_app(app,
                  ping_timeout=60,
                  ping_interval=25)
 
-# Create an application context for the main thread
-app_ctx = app.app_context()
-app_ctx.push()
-
-# This is what Gunicorn uses
-application = app
+# Create the WSGI application
+wsgi = socketio.WSGIApp(app)
+application = wsgi
 
 if __name__ == '__main__':
     socketio.run(app)
