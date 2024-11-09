@@ -1,6 +1,5 @@
-# Monkey patch must happen before any other imports
-import eventlet
-eventlet.monkey_patch(all=True, socket=True, time=True, select=True, os=True)
+# Import monkey patch first
+import monkey
 
 # Now we can safely import our application
 from app import create_app, socketio

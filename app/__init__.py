@@ -1,3 +1,5 @@
+import monkey
+
 from flask import Flask, request, url_for, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
