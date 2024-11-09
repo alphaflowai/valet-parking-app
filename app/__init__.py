@@ -25,13 +25,7 @@ db = SQLAlchemy()
 login = LoginManager()
 login.login_view = 'main.login'
 migrate = Migrate()
-socketio = SocketIO(
-    cors_allowed_origins="*", 
-    async_mode='eventlet',
-    message_queue=None,
-    ping_timeout=60,
-    ping_interval=25
-)
+socketio = SocketIO()
 csrf = CSRFProtect()
 limiter = Limiter(key_func=get_remote_address)
 mail = Mail()
