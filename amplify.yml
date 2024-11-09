@@ -24,8 +24,7 @@ applications:
                 --error-logfile - \
                 --capture-output \
                 --enable-stdio-inheritance \
-                --proxy-allow-ips="*" \
-                --forwarded-allow-ips="*" \
+                --forwarded-allow-ips "*" \
                 wsgi:wsgi' > start.sh
             - chmod +x start.sh
         build:

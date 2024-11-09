@@ -37,6 +37,5 @@ def test_disconnect():
 
 # Create the WSGI application
 wsgi = socketio.wsgi_app
-
 if __name__ == '__main__':
     socketio.run(app)
