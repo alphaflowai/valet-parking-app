@@ -12,7 +12,7 @@ applications:
             - mkdir -p config
             - touch config/__init__.py
             - |
-              echo 'wsgi_app = "wsgi:application"
+              echo 'wsgi_app = "wsgi:wsgi"
               bind = "0.0.0.0:8000"
               worker_class = "eventlet"
               workers = 1
@@ -26,7 +26,9 @@ applications:
               preload_app = True
               worker_connections = 1000
               daemon = False
-              forwarded_allow_ips = "*"' > gunicorn.conf.py
+              forwarded_allow_ips = "*"
+              capture_output = True
+              enable_stdio_inheritance = True' > gunicorn.conf.py
         build:
           commands:
             - echo "Starting Flask application with Gunicorn"
