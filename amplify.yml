@@ -12,9 +12,9 @@ applications:
             - |
               echo "Checking dependencies..."
               python -c "import eventlet; print('Eventlet version:', eventlet.__version__)"
-              python -c "import flask_socketio; print('Flask-SocketIO version:', flask_socketio.__version__)"
-              python -c "import python_socketio; print('Python-SocketIO version:', python_socketio.__version__)"
-              python -c "import engineio; print('Engine.IO version:', engineio.__version__)"
+              python -c "import socketio; print('Python-SocketIO version:', socketio.__version__)"
+              python -c "import flask_socketio; print('Flask-SocketIO package:', flask_socketio.__name__)"
+              python -c "import engineio; print('Engine.IO package:', engineio.__name__)"
             - mkdir -p config
             - touch config/__init__.py
             - |
