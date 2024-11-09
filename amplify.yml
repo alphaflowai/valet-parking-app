@@ -19,11 +19,13 @@ applications:
                 --bind 0.0.0.0:8000 \
                 --timeout 120 \
                 --keep-alive 2 \
-                --log-level info \
+                --log-level debug \
                 --access-logfile - \
                 --error-logfile - \
                 --capture-output \
                 --enable-stdio-inheritance \
+                --proxy-allow-ips="*" \
+                --forwarded-allow-ips="*" \
                 wsgi:wsgi' > start.sh
             - chmod +x start.sh
         build:
