@@ -12,29 +12,24 @@ applications:
             - mkdir -p config
             - touch config/__init__.py
             - |
-              echo 'wsgi_app = "wsgi:wsgi"
-              bind = "0.0.0.0:8000"
-              worker_class = "eventlet"
-              workers = 1
-              threads = 1
-              timeout = 120
-              keepalive = 2
-              reload = False
-              accesslog = "-"
-              errorlog = "-"
-              loglevel = "info"
-              preload_app = True
-              worker_connections = 1000
-              daemon = False
-              forwarded_allow_ips = "*"
-              capture_output = True
-              enable_stdio_inheritance = True
-              proxy_protocol = True
-              proxy_allow_ips = "*"' > gunicorn.conf.py
+              echo '#!/bin/bash
+              exec gunicorn \
+                --worker-class eventlet \
+                --workers 1 \
+                --bind 0.0.0.0:8000 \
+                --timeout 120 \
+                --keep-alive 2 \
+                --log-level info \
+                --access-logfile - \
+                --error-logfile - \
+                --capture-output \
+                --enable-stdio-inheritance \
+                wsgi:wsgi' > start.sh
+            - chmod +x start.sh
         build:
           commands:
             - echo "Starting Flask application with Gunicorn"
-            - gunicorn --config gunicorn.conf.py wsgi:wsgi
+            - ./start.sh
       artifacts:
         baseDirectory: .
         files:
