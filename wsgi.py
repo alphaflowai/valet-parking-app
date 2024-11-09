@@ -35,7 +35,8 @@ def test_connect():
 def test_disconnect():
     print('Client disconnected')
 
-# Create the WSGI application
-wsgi = socketio.wsgi_app
+# This is what Gunicorn uses - use the Flask app directly
+wsgi = app
+
 if __name__ == '__main__':
     socketio.run(app)
