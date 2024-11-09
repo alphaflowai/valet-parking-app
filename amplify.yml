@@ -7,29 +7,50 @@ applications:
             - pip install --upgrade pip
             - pip install -r requirements.txt
             - export FLASK_APP=run.py
-            - export FLASK_ENV=production
+            - export FLASK_ENV=development
             - export PYTHONPATH=$PYTHONPATH:/codebuild/output/src2603305598/src/valet-parking-app
             - mkdir -p config
             - touch config/__init__.py
             - |
+              echo 'import multiprocessing
+
+              # Gunicorn config
+              bind = "0.0.0.0:8000"
+              worker_class = "eventlet"
+              workers = 1
+              threads = 1
+              timeout = 120
+              keepalive = 2
+              reload = True
+              reload_engine = "auto"
+              spew = True
+              check_config = True
+              preload_app = True
+
+              # Logging
+              loglevel = "debug"
+              accesslog = "-"
+              errorlog = "-"
+              capture_output = True
+              enable_stdio_inheritance = True
+
+              # SSL/Proxy settings
+              forwarded_allow_ips = "*"
+              proxy_protocol = False
+              proxy_allow_ips = "*"' > gunicorn.conf.py
+            - |
               echo '#!/bin/bash
               exec gunicorn \
-                --worker-class eventlet \
-                --workers 1 \
-                --bind 0.0.0.0:8000 \
-                --timeout 120 \
-                --keep-alive 2 \
+                -c gunicorn.conf.py \
                 --log-level debug \
-                --access-logfile - \
-                --error-logfile - \
-                --capture-output \
-                --enable-stdio-inheritance \
-                --forwarded-allow-ips "*" \
+                --preload \
                 wsgi:wsgi' > start.sh
             - chmod +x start.sh
         build:
           commands:
             - echo "Starting Flask application with Gunicorn"
+            - python -c "import eventlet; print('Eventlet version:', eventlet.__version__)"
+            - python -c "from flask_socketio import SocketIO; print('Flask-SocketIO version:', SocketIO.__version__)"
             - ./start.sh
       artifacts:
         baseDirectory: .
