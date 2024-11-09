@@ -1,5 +1,5 @@
-# Import monkey patch first
-import monkey
+# Import monkey patch first - before ANY other imports
+from monkey import *
 
 # Now we can safely import our application
 from app import create_app, socketio
@@ -14,7 +14,7 @@ socketio.init_app(app,
                  ping_timeout=60,
                  ping_interval=25)
 
-# This is what Gunicorn uses
+# This is what Gunicorn uses - no middleware!
 wsgi = app
 
 if __name__ == '__main__':

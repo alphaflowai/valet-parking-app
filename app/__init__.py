@@ -1,5 +1,7 @@
-import monkey
+# Import monkey patch first
+from monkey import *
 
+# Now import everything else
 from flask import Flask, request, url_for, redirect, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
@@ -23,7 +25,13 @@ db = SQLAlchemy()
 login = LoginManager()
 login.login_view = 'main.login'
 migrate = Migrate()
-socketio = SocketIO(cors_allowed_origins="*", ssl_context=None)
+socketio = SocketIO(
+    cors_allowed_origins="*", 
+    async_mode='eventlet',
+    message_queue=None,
+    ping_timeout=60,
+    ping_interval=25
+)
 csrf = CSRFProtect()
 limiter = Limiter(key_func=get_remote_address)
 mail = Mail()
