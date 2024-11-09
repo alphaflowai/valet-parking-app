@@ -12,11 +12,14 @@ applications:
             - |
               cat << 'EOF' > start.sh
               #!/bin/bash
-              # Enable debug output
-              set -x
               
               echo "Starting Gunicorn..."
               
+              # Export for eventlet
+              export EVENTLET_NOSSL=yes
+              export EVENTLET_DEBUG=1
+              
+              # Start Gunicorn
               gunicorn \
                 --worker-class eventlet \
                 --workers 1 \
@@ -27,12 +30,15 @@ applications:
                 --error-logfile - \
                 --access-logfile - \
                 --capture-output \
+                --preload \
+                --worker-connections 1000 \
                 wsgi:wsgi &
               
               GUNICORN_PID=$!
               
               echo "Gunicorn started with PID: $GUNICORN_PID"
               
+              # Wait for startup
               sleep 5
               
               if ps -p $GUNICORN_PID > /dev/null; then
@@ -48,8 +54,6 @@ applications:
             - chmod +x start.sh
         build:
           commands:
-            - 'echo "Current directory: $(pwd)"'
-            - 'echo "Python path: $PYTHONPATH"'
             - echo "Starting Flask application with Gunicorn"
             - ./start.sh
       artifacts:
