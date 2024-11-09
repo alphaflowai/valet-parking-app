@@ -9,11 +9,14 @@ applications:
             - export FLASK_APP=run.py
             - export FLASK_ENV=development
             - export PYTHONPATH=$PYTHONPATH:/codebuild/output/src2603305598/src/valet-parking-app
-            - mkdir -p config
-            - touch config/__init__.py
             - |
               echo '#!/bin/bash
-              # Run gunicorn in the background
+              # Enable debug output
+              set -x
+
+              echo "Starting Gunicorn..."
+              
+              # Start Gunicorn without config file
               gunicorn \
                 --worker-class eventlet \
                 --workers 1 \
@@ -21,37 +24,38 @@ applications:
                 --timeout 30 \
                 --keep-alive 2 \
                 --log-level debug \
-                --access-logfile - \
                 --error-logfile - \
+                --access-logfile - \
                 --capture-output \
-                --preload \
                 wsgi:wsgi &
 
-              # Store the Gunicorn PID
+              # Store the PID
               GUNICORN_PID=$!
-
-              # Wait for the server to start (max 30 seconds)
-              max_attempts=30
-              counter=0
-              echo "Waiting for server to start..."
-              while ! curl -s http://localhost:8000/health > /dev/null && [ $counter -lt $max_attempts ]; do
-                sleep 1
-                counter=$((counter+1))
-                echo "Attempt $counter/$max_attempts..."
-              done
-
-              if [ $counter -lt $max_attempts ]; then
-                echo "Server started successfully!"
-                # Keep the script running
+              
+              echo "Gunicorn started with PID: $GUNICORN_PID"
+              
+              # Wait a bit for initial startup
+              sleep 5
+              
+              # Check if process is still running
+              if ps -p $GUNICORN_PID > /dev/null; then
+                echo "Gunicorn process is running"
+                
+                # Try to connect to the health endpoint
+                echo "Testing connection to health endpoint..."
+                curl -v http://localhost:8000/health
+                
+                # Keep running
                 wait $GUNICORN_PID
               else
-                echo "Server failed to start within 30 seconds"
-                kill $GUNICORN_PID
+                echo "Gunicorn process failed to start"
                 exit 1
               fi' > start.sh
             - chmod +x start.sh
         build:
           commands:
+            - echo "Current directory: $(pwd)"
+            - echo "Python path: $PYTHONPATH"
             - echo "Starting Flask application with Gunicorn"
             - ./start.sh
       artifacts:
