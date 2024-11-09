@@ -17,22 +17,24 @@ applications:
               worker_class = "eventlet"
               workers = 1
               threads = 1
-              timeout = 30
+              timeout = 120
               keepalive = 2
-              reload = True
+              reload = False
               accesslog = "-"
               errorlog = "-"
-              loglevel = "debug"
+              loglevel = "info"
               preload_app = True
               worker_connections = 1000
               daemon = False
               forwarded_allow_ips = "*"
               capture_output = True
-              enable_stdio_inheritance = True' > gunicorn.conf.py
+              enable_stdio_inheritance = True
+              proxy_protocol = True
+              proxy_allow_ips = "*"' > gunicorn.conf.py
         build:
           commands:
             - echo "Starting Flask application with Gunicorn"
-            - gunicorn --config gunicorn.conf.py --log-level debug --capture-output --enable-stdio-inheritance
+            - gunicorn --config gunicorn.conf.py wsgi:wsgi
       artifacts:
         baseDirectory: .
         files:

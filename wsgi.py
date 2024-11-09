@@ -6,8 +6,8 @@ from app import create_app, socketio
 
 app = create_app()
 
-# Initialize Socket.IO with the correct configuration
-socketio.init_app(app, 
+# Initialize Socket.IO with production settings
+socketio.init_app(app,
                  async_mode='eventlet',
                  message_queue=None,
                  cors_allowed_origins="*",
