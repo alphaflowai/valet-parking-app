@@ -10,26 +10,23 @@ from flask_socketio import SocketIO
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Initialize Flask without any config for now
+# Initialize Flask
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-key-123')
 app.config['DEBUG'] = True
 
-# Initialize SocketIO with minimal config
+# Initialize SocketIO
 socketio = SocketIO(
     app,
     async_mode='eventlet',
     cors_allowed_origins="*",
     logger=True,
-    engineio_logger=True,
-    ping_timeout=60,
-    ping_interval=25,
-    manage_session=False
+    engineio_logger=True
 )
 
 @app.route('/')
 def health():
-    logger.debug("Health check endpoint called")
+    logger.info("Health check endpoint called")
     return {'status': 'healthy'}, 200
 
 @socketio.on('connect')
@@ -41,14 +38,8 @@ def test_connect():
 def test_disconnect():
     logger.info("Client disconnected")
 
-# For debugging
-@app.before_request
-def log_request_info():
-    logger.debug('Headers: %s', dict(request.headers))
-    logger.debug('Body: %s', request.get_data())
-
-# Create combined WSGI app
-wsgi = socketio.middleware(app)
+# This is what Gunicorn uses
+wsgi = app
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
