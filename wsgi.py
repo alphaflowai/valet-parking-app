@@ -15,7 +15,8 @@ socketio.init_app(app,
                  ping_timeout=60,
                  ping_interval=25)
 
-# This is what Gunicorn uses
+# This is what Gunicorn uses - both names for compatibility
+wsgi = app
 application = app
 
 if __name__ == '__main__':

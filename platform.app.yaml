@@ -1,2 +1,2 @@
 runtime: python3.9
-entrypoint: gunicorn --worker-class eventlet -w 1 --bind :8080 wsgi:application
+entrypoint: gunicorn --worker-class eventlet -w 1 --bind :8080 wsgi:wsgi
