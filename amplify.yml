@@ -11,25 +11,47 @@ applications:
             - export PYTHONUNBUFFERED=1
             - export PYTHONPATH=$PYTHONPATH:/codebuild/output/src2603305598/src/valet-parking-app
             - |
+              cat << 'EOF' > gunicorn_config.py
+              import multiprocessing
+              
+              bind = "0.0.0.0:8000"
+              worker_class = "eventlet"
+              workers = 1
+              threads = 1
+              preload_app = True
+              
+              def when_ready(server):
+                  # Ensure application context is available
+                  from wsgi import app
+                  with app.app_context():
+                      server.log.info("Application context ready")
+              
+              def on_starting(server):
+                  server.log.info("Server is starting")
+              
+              def pre_fork(server, worker):
+                  server.log.info("Pre-fork hook")
+              
+              def post_fork(server, worker):
+                  from wsgi import app
+                  with app.app_context():
+                      server.log.info("Worker ready with application context")
+              EOF
+            - |
               cat << 'EOF' > start.sh
               #!/bin/bash
               set -e
               
-              # Export environment variables for eventlet
               export EVENTLET_NOSSL=yes
               export EVENTLET_DEBUG=false
               export PYTHONPATH="${PYTHONPATH}:${PWD}"
               
-              # Start Gunicorn
               exec gunicorn \
-                --worker-class eventlet \
-                --workers 1 \
-                --bind 0.0.0.0:8000 \
+                --config gunicorn_config.py \
                 --log-level warning \
                 --error-logfile - \
                 --access-logfile - \
                 --capture-output \
-                --preload \
                 wsgi:wsgi
               EOF
             - chmod +x start.sh
