@@ -7,40 +7,30 @@ applications:
             - pip install --upgrade pip
             - pip install -r requirements.txt
             - export FLASK_APP=run.py
-            - export FLASK_ENV=development
+            - export FLASK_ENV=production
+            - export PYTHONUNBUFFERED=1
             - export PYTHONPATH=$PYTHONPATH:/codebuild/output/src2603305598/src/valet-parking-app
             - |
               cat << 'EOF' > start.sh
               #!/bin/bash
+              set -e
               
-              echo "Starting Gunicorn..."
-              
-              # Minimal environment setup
+              # Export environment variables for eventlet
               export EVENTLET_NOSSL=yes
+              export EVENTLET_DEBUG=false
+              export PYTHONPATH="${PYTHONPATH}:${PWD}"
               
-              # Start Gunicorn with minimal config
-              gunicorn \
+              # Start Gunicorn
+              exec gunicorn \
                 --worker-class eventlet \
                 --workers 1 \
                 --bind 0.0.0.0:8000 \
-                --log-level info \
-                --access-logfile - \
+                --log-level warning \
                 --error-logfile - \
-                wsgi:wsgi &
-              
-              GUNICORN_PID=$!
-              
-              echo "Gunicorn started with PID: $GUNICORN_PID"
-              sleep 5
-              
-              if ps -p $GUNICORN_PID > /dev/null; then
-                echo "Gunicorn process is running"
-                curl -s http://localhost:8000/health || true
-                wait $GUNICORN_PID
-              else
-                echo "Gunicorn process failed to start"
-                exit 1
-              fi
+                --access-logfile - \
+                --capture-output \
+                --preload \
+                wsgi:wsgi
               EOF
             - chmod +x start.sh
         build:
