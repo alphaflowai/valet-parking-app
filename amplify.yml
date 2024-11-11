@@ -4,11 +4,9 @@ applications:
       phases:
         preBuild:
           commands:
-            # Install required packages
-            - apt-get update && apt-get install -y postgresql-client jq
             # Python setup
             - pip install --upgrade pip
-            # Install core dependencies first
+            # Core dependencies
             - pip install Werkzeug==2.3.7
             - pip install flask==2.3.3
             - pip install MarkupSafe==2.1.3
@@ -17,39 +15,30 @@ applications:
             - pip install eventlet==0.33.3
             - pip install gunicorn==21.2.0
             - pip install flask-socketio==5.3.6
-            # Install remaining requirements
+            # Full requirements
             - pip install -r requirements.txt
             # Environment setup
             - export FLASK_APP=wsgi.py
             - export FLASK_ENV=production
-            - export PYTHONUNBUFFERED=1
-            # Fetch secrets
-            - |
-              SECRETS=$(aws secretsmanager get-secret-value --secret-id /valet-parking-app/secrets --query 'SecretString' --output text)
-              export SECRET_KEY=$(echo $SECRETS | jq -r '.SECRET_KEY')
-              export DATABASE_URL=$(echo $SECRETS | jq -r '.DATABASE_URL')
-            - |
-              cat << 'EOF' > start.sh
-              #!/bin/bash
-              set -e
-              export EVENTLET_NOSSL=yes
-              export EVENTLET_DEBUG=false
-              exec gunicorn \
-                --config gunicorn.conf.py \
-                --log-level warning \
-                wsgi:wsgi
-              EOF
-            - chmod +x start.sh
         build:
           commands:
-            - echo "Starting Flask application"
-            - ./start.sh
+            - echo "Building Flask application"
+            - python -c "import eventlet; print('Eventlet version:', eventlet.__version__)"
+            - |
+              gunicorn \
+                --worker-class eventlet \
+                --workers 1 \
+                --bind 0.0.0.0:8000 \
+                --timeout 120 \
+                --log-level warning \
+                --error-logfile - \
+                --access-logfile - \
+                wsgi:wsgi
       artifacts:
         baseDirectory: .
         files:
           - '**/*'
       cache:
         paths:
-          - .pip-cache
           - /root/.cache/pip
     appRoot: .
