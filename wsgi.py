@@ -15,7 +15,6 @@ class Config:
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
 
 def create_app():
-    """Application factory with proper error handling"""
     app = Flask(__name__)
     app.config.from_object(Config)
     
