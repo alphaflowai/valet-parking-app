@@ -4,29 +4,20 @@ applications:
       phases:
         preBuild:
           commands:
-            # Environment setup first
+            # Environment setup
             - export FLASK_APP=wsgi.py
             - export FLASK_ENV=production
-            - export PYTHONUNBUFFERED=1
-            # Install all dependencies at once with constraints
-            - |
-              cat << 'EOF' > requirements-lock.txt
-              eventlet==0.37.0
-              Werkzeug==2.3.7
-              Flask==2.3.3
-              Flask-SocketIO==5.3.6
-              python-socketio==5.11.3
-              python-engineio==4.9.1
-              gunicorn==23.0.0
-              EOF
-            - pip install -r requirements-lock.txt
+            - pip install --upgrade pip
+            # Install dependencies
+            - pip install eventlet==0.37.0 Werkzeug==2.3.7 Flask==2.3.3 gunicorn==23.0.0
         build:
           commands:
-            - gunicorn --worker-class eventlet --workers 1 --bind 0.0.0.0:8000 --timeout 60 --preload wsgi:wsgi
+            - gunicorn --worker-class eventlet --workers 1 --bind 0.0.0.0:8000 wsgi:wsgi
       artifacts:
+        baseDirectory: .
         files:
           - '**/*'
       cache:
         paths:
-          - .pip-cache
-    appRoot: .
+          - /root/.cache/pip
+    appRoot: valet-parking-app
