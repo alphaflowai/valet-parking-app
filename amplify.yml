@@ -4,39 +4,38 @@ applications:
       phases:
         preBuild:
           commands:
-            # System setup
-            - python --version
-            - pip install --upgrade pip
-            
-            # Install core dependencies in correct order
-            - pip install eventlet==0.33.3
-            - pip install gunicorn==21.2.0
-            - pip install flask==2.3.3
+            # Install core dependencies only
+            - pip install eventlet==0.37.0
+            - pip install flask==3.0.3
             - pip install flask-socketio==5.3.6
-            
-            # Install remaining dependencies
-            - pip install -r requirements.txt
-            
+            - pip install gunicorn==23.0.0
+            - pip install python-socketio==5.11.3
+            - pip install python-engineio==4.9.1
             # Environment setup
             - export FLASK_APP=wsgi.py
             - export FLASK_ENV=production
             - export PYTHONUNBUFFERED=1
-            
-            # Verify installations
-            - python -c "import eventlet; print('Eventlet version:', eventlet.__version__)"
-            - python -c "import flask; print('Flask version:', flask.__version__)"
-        build:
-          commands:
-            - echo "Starting application"
+            # Create start script
             - |
-              gunicorn \
-                --config gunicorn.conf.py \
-                --log-level debug \
+              cat << 'EOF' > start.sh
+              #!/bin/bash
+              set -e
+              
+              # Start Gunicorn with timeout
+              timeout 300 gunicorn \
+                --worker-class eventlet \
+                --workers 1 \
+                --bind 0.0.0.0:8000 \
+                --log-level info \
                 --error-logfile - \
                 --access-logfile - \
                 --capture-output \
-                --preload \
                 wsgi:wsgi
+              EOF
+            - chmod +x start.sh
+        build:
+          commands:
+            - ./start.sh
       artifacts:
         baseDirectory: .
         files:
