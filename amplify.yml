@@ -4,25 +4,17 @@ applications:
       phases:
         preBuild:
           commands:
-            # Basic setup
-            - export FLASK_APP=wsgi.py
-            - export FLASK_ENV=production
-            - pip install --upgrade pip
-            # Install dependencies in correct order with compatible versions
-            - pip install Werkzeug==3.0.1
+            - pip install gunicorn==21.2.0
             - pip install Flask==3.0.0
             - pip install eventlet==0.33.3
-            - pip install gunicorn==21.2.0
-            - pip install flask-socketio==5.3.6
         build:
           commands:
-            - echo "Starting Flask application"
-            - gunicorn --worker-class eventlet --workers 1 --bind 0.0.0.0:8000 wsgi:wsgi
+            # Add debug output
+            - echo "Current directory: $(pwd)"
+            - echo "Directory contents: $(ls -la)"
+            - gunicorn --bind=0.0.0.0:8000 wsgi:wsgi
       artifacts:
         baseDirectory: .
         files:
           - '**/*'
-      cache:
-        paths:
-          - /root/.cache/pip
     appRoot: .
