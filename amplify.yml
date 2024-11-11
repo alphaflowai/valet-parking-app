@@ -4,40 +4,35 @@ applications:
       phases:
         preBuild:
           commands:
-            # Environment setup
             - export FLASK_APP=wsgi.py
             - export FLASK_ENV=production
             - pip install --upgrade pip
             - pip install eventlet==0.37.0 Werkzeug==2.3.7 Flask==2.3.3 gunicorn==23.0.0
-            # Create start script
             - |
               cat << 'EOF' > start.sh
               #!/bin/bash
               set -e
               
               echo "Starting Gunicorn..."
-              # Start Gunicorn in background
               gunicorn \
                 --worker-class eventlet \
                 --workers 1 \
                 --bind 0.0.0.0:8000 \
+                --forwarded-allow-ips="*" \
                 --daemon \
                 --pid gunicorn.pid \
-                --log-level debug \
-                --error-logfile gunicorn.error.log \
+                --access-logfile - \
+                --error-logfile - \
                 wsgi:wsgi &
               
-              # Wait for it to start
               sleep 5
               
-              # Check if process is running
               if kill -0 $(cat gunicorn.pid) 2>/dev/null; then
                   echo "Gunicorn started successfully"
-                  cat gunicorn.error.log
+                  curl -v http://localhost:8000/health
                   exit 0
               else
                   echo "Gunicorn failed to start"
-                  cat gunicorn.error.log
                   exit 1
               fi
               EOF
@@ -49,8 +44,14 @@ applications:
         baseDirectory: .
         files:
           - '**/*'
-          - gunicorn.error.log
       cache:
         paths:
           - /root/.cache/pip
+      customHeaders:
+        - pattern: '**/*'
+          headers:
+            - key: 'Cache-Control'
+              value: 'no-store'
+            - key: 'X-Frame-Options'
+              value: 'SAMEORIGIN'
     appRoot: .
