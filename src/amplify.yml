@@ -1,0 +1,23 @@
+version: 1
+applications:
+  - frontend:
+      phases:
+        preBuild:
+          commands:
+            # Environment setup
+            - export FLASK_APP=wsgi.py
+            - export FLASK_ENV=production
+            - pip install --upgrade pip
+            # Install dependencies
+            - pip install eventlet==0.37.0 Werkzeug==2.3.7 Flask==2.3.3 gunicorn==23.0.0
+        build:
+          commands:
+            - gunicorn --worker-class eventlet --workers 1 --bind 0.0.0.0:8000 wsgi:wsgi
+      artifacts:
+        baseDirectory: .
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - /root/.cache/pip
+    appRoot: valet-parking-app
