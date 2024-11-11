@@ -4,60 +4,45 @@ applications:
       phases:
         preBuild:
           commands:
+            # Install required packages
+            - apt-get update && apt-get install -y postgresql-client jq
+            # Python setup
             - pip install --upgrade pip
+            # Install core dependencies first
+            - pip install Werkzeug==2.3.7
+            - pip install flask==2.3.3
+            - pip install MarkupSafe==2.1.3
+            - pip install itsdangerous==2.1.2
+            - pip install idna==3.4
+            - pip install eventlet==0.33.3
+            - pip install gunicorn==21.2.0
+            - pip install flask-socketio==5.3.6
+            # Install remaining requirements
             - pip install -r requirements.txt
-            - export FLASK_APP=run.py
+            # Environment setup
+            - export FLASK_APP=wsgi.py
             - export FLASK_ENV=production
             - export PYTHONUNBUFFERED=1
-            - export PYTHONPATH=$PYTHONPATH:/codebuild/output/src2603305598/src/valet-parking-app
+            # Fetch secrets
             - |
-              cat << 'EOF' > gunicorn_config.py
-              import multiprocessing
-              
-              bind = "0.0.0.0:8000"
-              worker_class = "eventlet"
-              workers = 1
-              threads = 1
-              preload_app = True
-              
-              def when_ready(server):
-                  # Ensure application context is available
-                  from wsgi import app
-                  with app.app_context():
-                      server.log.info("Application context ready")
-              
-              def on_starting(server):
-                  server.log.info("Server is starting")
-              
-              def pre_fork(server, worker):
-                  server.log.info("Pre-fork hook")
-              
-              def post_fork(server, worker):
-                  from wsgi import app
-                  with app.app_context():
-                      server.log.info("Worker ready with application context")
-              EOF
+              SECRETS=$(aws secretsmanager get-secret-value --secret-id /valet-parking-app/secrets --query 'SecretString' --output text)
+              export SECRET_KEY=$(echo $SECRETS | jq -r '.SECRET_KEY')
+              export DATABASE_URL=$(echo $SECRETS | jq -r '.DATABASE_URL')
             - |
               cat << 'EOF' > start.sh
               #!/bin/bash
               set -e
-              
               export EVENTLET_NOSSL=yes
               export EVENTLET_DEBUG=false
-              export PYTHONPATH="${PYTHONPATH}:${PWD}"
-              
               exec gunicorn \
-                --config gunicorn_config.py \
+                --config gunicorn.conf.py \
                 --log-level warning \
-                --error-logfile - \
-                --access-logfile - \
-                --capture-output \
                 wsgi:wsgi
               EOF
             - chmod +x start.sh
         build:
           commands:
-            - echo "Starting Flask application with Gunicorn"
+            - echo "Starting Flask application"
             - ./start.sh
       artifacts:
         baseDirectory: .
@@ -66,4 +51,5 @@ applications:
       cache:
         paths:
           - .pip-cache
+          - /root/.cache/pip
     appRoot: .

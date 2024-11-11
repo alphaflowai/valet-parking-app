@@ -2,67 +2,79 @@
 from monkey import *
 
 import os
-import logging
-from flask import Flask, current_app
+import signal
+from flask import Flask, request
 from flask_socketio import SocketIO
-import eventlet.wsgi
 
-# Set up logging
-logging.basicConfig(level=logging.WARNING)
-logger = logging.getLogger(__name__)
+class Config:
+    """Application configuration"""
+    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-key-123')
+    DEBUG = False
+    TESTING = False
+    CORS_HEADERS = 'Content-Type'
+    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
 
 def create_app():
-    # Initialize Flask
-    app = Flask(__name__.split('.')[0])
+    """Application factory with proper error handling"""
+    app = Flask(__name__)
+    app.config.from_object(Config)
     
-    # Basic configuration
-    app.config.update(
-        SECRET_KEY=os.getenv('SECRET_KEY', 'dev-key-123'),
-        DEBUG=False,
-        TESTING=False,
-        PRESERVE_CONTEXT_ON_EXCEPTION=True
+    # Initialize SocketIO
+    socketio = SocketIO(
+        app, 
+        async_mode='eventlet',
+        cors_allowed_origins="*",
+        manage_session=False,
+        logger=False,
+        engineio_logger=False
     )
     
-    # Push application context
-    ctx = app.app_context()
-    ctx.push()
+    # Health check endpoint
+    @app.route('/health')
+    def health():
+        return {
+            'status': 'healthy',
+            'version': os.getenv('BUILD_VERSION', 'development')
+        }, 200
+
+    # Basic routes
+    @app.route('/')
+    def home():
+        return {
+            'status': 'running',
+            'environment': os.getenv('FLASK_ENV', 'production')
+        }, 200
     
-    try:
-        # Initialize SocketIO within context
-        socketio = SocketIO(
-            app, 
-            async_mode='eventlet',
-            message_queue=None,
-            cors_allowed_origins="*"
-        )
-        
-        @app.route('/health')
-        def health():
-            return {'status': 'healthy'}, 200
+    # Graceful shutdown handler
+    def shutdown_handler(signum, frame):
+        socketio.stop()
+    
+    signal.signal(signal.SIGTERM, shutdown_handler)
+    
+    # Socket.IO events
+    @socketio.on('connect')
+    def handle_connect():
+        app.logger.info('Client connected')
+    
+    @socketio.on('disconnect')
+    def handle_disconnect():
+        app.logger.info('Client disconnected')
+    
+    # Error handlers
+    @app.errorhandler(404)
+    def not_found_error(error):
+        return {'error': 'Not Found'}, 404
 
-        @app.route('/')
-        def home():
-            return {'status': 'running'}, 200
-            
-        @socketio.on('connect')
-        def handle_connect():
-            logger.info('Client connected')
-            
-        @socketio.on('disconnect')
-        def handle_disconnect():
-            logger.info('Client disconnected')
-            
-        return app
-        
-    except Exception as e:
-        logger.error(f"Error during app initialization: {e}")
-        ctx.pop()
-        raise
+    @app.errorhandler(500)
+    def internal_error(error):
+        return {'error': 'Internal Server Error'}, 500
+    
+    return app
 
-# Create the application with context
+# Create application instance
 app = create_app()
 
-# The WSGI application
+# WSGI application
 wsgi = app
 
 if __name__ == '__main__':
