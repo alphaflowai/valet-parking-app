@@ -3,39 +3,31 @@ import eventlet
 eventlet.monkey_patch()
 
 import os
-from flask import Flask, request
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
-
-@app.before_request
-def before_request():
-    if 'X-Forwarded-Proto' in request.headers:
-        if request.headers['X-Forwarded-Proto'] != 'https':
-            url = request.url.replace('http://', 'https://', 1)
-            return redirect(url, code=301)
+CORS(app)
 
 @app.route('/')
 def home():
-    return {
+    return jsonify({
         'status': 'running',
-        'version': '1.0',
-        'endpoints': {
-            'health': '/health',
-            'api': '/api'
-        }
-    }
+        'version': '1.0'
+    })
 
 @app.route('/health')
 def health():
-    return {'status': 'healthy'}, 200
+    return jsonify({'status': 'healthy'}), 200
 
 @app.route('/api')
 def api():
-    return {
+    return jsonify({
         'service': 'Valet Parking API',
         'status': 'active'
-    }
+    })
 
+# This is what Gunicorn uses
 wsgi = app
 
 if __name__ == '__main__':
