@@ -20,37 +20,39 @@ applications:
                 --worker-class eventlet \
                 --workers 1 \
                 --bind 127.0.0.1:8000 \
-                --forwarded-allow-ips="*" \
                 --access-logfile access.log \
                 --error-logfile error.log \
+                --timeout 30 \
                 wsgi:wsgi &
               
               GUNICORN_PID=$!
-              echo $GUNICORN_PID > gunicorn.pid
-              
               echo "Gunicorn started with PID: $GUNICORN_PID"
-              sleep 5
               
-              # Check if process is running and test endpoint
-              if ps -p $GUNICORN_PID > /dev/null; then
-                  echo "Testing health endpoint..."
-                  RESPONSE=$(curl -s http://127.0.0.1:8000/health)
-                  if [ $? -eq 0 ]; then
-                      echo "Health check successful: $RESPONSE"
-                      # Keep the process running
-                      wait $GUNICORN_PID
-                      exit 0
-                  else
-                      echo "Health check failed"
-                      kill $GUNICORN_PID
-                      exit 1
-                  fi
+              # Give it a moment to start
+              sleep 3
+              
+              # Try health check with timeout
+              echo "Testing health endpoint..."
+              RESPONSE=$(curl -s --max-time 5 http://127.0.0.1:8000/health)
+              CURL_STATUS=$?
+              
+              if [ $CURL_STATUS -eq 0 ] && [ "$(echo $RESPONSE | grep -c 'healthy')" -gt 0 ]; then
+                  echo "Health check successful: $RESPONSE"
+                  
+                  # Keep running in foreground
+                  tail -f access.log &
+                  TAIL_PID=$!
+                  
+                  # Wait for either process to exit
+                  wait -n $GUNICORN_PID $TAIL_PID
+                  exit 0
               else
-                  echo "Process failed to start"
+                  echo "Health check failed with status $CURL_STATUS"
                   if [ -f error.log ]; then
                       echo "Error log contents:"
                       cat error.log
                   fi
+                  kill $GUNICORN_PID
                   exit 1
               fi
               EOF
@@ -62,8 +64,8 @@ applications:
         baseDirectory: .
         files:
           - '**/*'
-          - error.log
           - access.log
+          - error.log
       cache:
         paths:
           - /root/.cache/pip
