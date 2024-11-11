@@ -4,38 +4,21 @@ applications:
       phases:
         preBuild:
           commands:
-            # Install core dependencies only
+            # Python setup
+            - pip install --upgrade pip
+            # Core dependencies in specific order
             - pip install eventlet==0.37.0
-            - pip install flask==3.0.3
+            - pip install Werkzeug==2.3.7
+            - pip install flask==2.3.3
             - pip install flask-socketio==5.3.6
             - pip install gunicorn==23.0.0
-            - pip install python-socketio==5.11.3
-            - pip install python-engineio==4.9.1
             # Environment setup
             - export FLASK_APP=wsgi.py
             - export FLASK_ENV=production
             - export PYTHONUNBUFFERED=1
-            # Create start script
-            - |
-              cat << 'EOF' > start.sh
-              #!/bin/bash
-              set -e
-              
-              # Start Gunicorn with timeout
-              timeout 300 gunicorn \
-                --worker-class eventlet \
-                --workers 1 \
-                --bind 0.0.0.0:8000 \
-                --log-level info \
-                --error-logfile - \
-                --access-logfile - \
-                --capture-output \
-                wsgi:wsgi
-              EOF
-            - chmod +x start.sh
         build:
           commands:
-            - ./start.sh
+            - gunicorn --worker-class eventlet --workers 1 --bind 0.0.0.0:8000 wsgi:wsgi
       artifacts:
         baseDirectory: .
         files:

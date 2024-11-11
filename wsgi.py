@@ -1,20 +1,30 @@
-# Setup eventlet first
+# First, monkey patch before ANY imports
 import eventlet
-eventlet.monkey_patch(all=True)
+eventlet.monkey_patch()
 
+# Flask imports
 import os
-from flask import Flask
+from flask import Flask, current_app
 from flask_socketio import SocketIO
 
-# Initialize Flask
+# Create Flask app
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-key-123')
+app.config.update(
+    SECRET_KEY=os.getenv('SECRET_KEY', 'dev-key-123'),
+    DEBUG=False
+)
 
-# Initialize SocketIO
+# Push an application context that will be used by Gunicorn
+ctx = app.app_context()
+ctx.push()
+
+# Initialize SocketIO after app context is pushed
 socketio = SocketIO(
-    app, 
+    app,
     async_mode='eventlet',
-    cors_allowed_origins="*"
+    cors_allowed_origins="*",
+    logger=False,
+    engineio_logger=False
 )
 
 @app.route('/health')
@@ -25,8 +35,9 @@ def health():
 def home():
     return {'status': 'running'}, 200
 
-# WSGI application
+# This is what Gunicorn uses
 wsgi = app
 
+# Don't remove the context
 if __name__ == '__main__':
     socketio.run(app)
