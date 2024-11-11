@@ -8,21 +8,16 @@ applications:
             - export FLASK_APP=wsgi.py
             - export FLASK_ENV=production
             - pip install --upgrade pip
-            # Core dependencies
-            - pip install eventlet==0.37.0
-            - pip install Werkzeug==2.3.7
-            - pip install Flask==2.3.3
-            - pip install gunicorn==23.0.0
+            # Install dependencies in correct order with compatible versions
+            - pip install Werkzeug==3.0.1
+            - pip install Flask==3.0.0
+            - pip install eventlet==0.33.3
+            - pip install gunicorn==21.2.0
+            - pip install flask-socketio==5.3.6
         build:
           commands:
             - echo "Starting Flask application"
-            - gunicorn wsgi:wsgi \
-                --worker-class eventlet \
-                --workers 1 \
-                --bind 0.0.0.0:8000 \
-                --log-level info \
-                --error-logfile - \
-                --access-logfile -
+            - gunicorn --worker-class eventlet --workers 1 --bind 0.0.0.0:8000 wsgi:wsgi
       artifacts:
         baseDirectory: .
         files:

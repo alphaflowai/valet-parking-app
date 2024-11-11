@@ -1,9 +1,10 @@
-Flask==3.0.3
-Flask-SocketIO==5.3.6
+Werkzeug==3.0.1
+Flask==3.0.0
+eventlet==0.33.3
+gunicorn==21.2.0
+flask-socketio==5.3.6
 python-socketio==5.11.3
 python-engineio==4.9.1
-eventlet==0.37.0
-gunicorn==23.0.0
 Flask-SQLAlchemy==3.1.1
 Flask-Login==0.6.3
 Flask-Migrate==4.0.7
@@ -62,7 +63,7 @@ redis==5.0.8
 simple-websocket==1.0.0
 SQLAlchemy==2.0.32
 typing_extensions==4.12.2
-Werkzeug==3.0.4
+Werkzeug==3.0.1
 wrapt==1.16.0
 wsproto==1.2.0
 WTForms==3.1.2
