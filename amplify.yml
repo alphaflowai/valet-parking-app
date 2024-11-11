@@ -1,4 +1,3 @@
-# amplify.yml
 version: 1
 applications:
   - frontend:
@@ -10,13 +9,47 @@ applications:
             - export FLASK_ENV=production
             - pip install --upgrade pip
             - pip install eventlet==0.37.0 Werkzeug==2.3.7 Flask==2.3.3 gunicorn==23.0.0
+            # Create start script
+            - |
+              cat << 'EOF' > start.sh
+              #!/bin/bash
+              set -e
+              
+              echo "Starting Gunicorn..."
+              # Start Gunicorn in background
+              gunicorn \
+                --worker-class eventlet \
+                --workers 1 \
+                --bind 0.0.0.0:8000 \
+                --daemon \
+                --pid gunicorn.pid \
+                --log-level debug \
+                --error-logfile gunicorn.error.log \
+                wsgi:wsgi &
+              
+              # Wait for it to start
+              sleep 5
+              
+              # Check if process is running
+              if kill -0 $(cat gunicorn.pid) 2>/dev/null; then
+                  echo "Gunicorn started successfully"
+                  cat gunicorn.error.log
+                  exit 0
+              else
+                  echo "Gunicorn failed to start"
+                  cat gunicorn.error.log
+                  exit 1
+              fi
+              EOF
+            - chmod +x start.sh
         build:
           commands:
-            - gunicorn --worker-class eventlet --workers 1 --bind 0.0.0.0:8000 wsgi:wsgi
+            - ./start.sh
       artifacts:
-        baseDirectory: /
+        baseDirectory: .
         files:
           - '**/*'
+          - gunicorn.error.log
       cache:
         paths:
           - /root/.cache/pip
