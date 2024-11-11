@@ -9,18 +9,20 @@ applications:
             - export FLASK_ENV=production
             - pip install --upgrade pip
             # Core dependencies
-            - pip install eventlet==0.37.0 Werkzeug==2.3.7 Flask==2.3.3 gunicorn==23.0.0
+            - pip install eventlet==0.37.0
+            - pip install Werkzeug==2.3.7
+            - pip install Flask==2.3.3
+            - pip install gunicorn==23.0.0
         build:
           commands:
             - echo "Starting Flask application"
-            # Run Gunicorn directly
             - gunicorn wsgi:wsgi \
-              --worker-class eventlet \
-              --workers 1 \
-              --bind 0.0.0.0:8000 \
-              --log-level info \
-              --error-logfile - \
-              --access-logfile -
+                --worker-class eventlet \
+                --workers 1 \
+                --bind 0.0.0.0:8000 \
+                --log-level info \
+                --error-logfile - \
+                --access-logfile -
       artifacts:
         baseDirectory: .
         files:
