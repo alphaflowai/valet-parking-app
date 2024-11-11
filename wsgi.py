@@ -1,22 +1,25 @@
-# Import monkey patch first - before ANY other imports
+# Import and verify monkey patching first
 from monkey import *
 
 import os
-import signal
-from flask import Flask, request
+import logging
+from flask import Flask
 from flask_socketio import SocketIO
 
-class Config:
-    """Application configuration"""
-    SECRET_KEY = os.getenv('SECRET_KEY', 'dev-key-123')
-    DEBUG = False
-    TESTING = False
-    CORS_HEADERS = 'Content-Type'
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(Config)
+    
+    # Basic configuration
+    app.config.update(
+        SECRET_KEY=os.getenv('SECRET_KEY', 'dev-key-123'),
+        DEBUG=False,
+        TESTING=False,
+        CORS_HEADERS='Content-Type'
+    )
     
     # Initialize SocketIO
     socketio = SocketIO(
@@ -28,54 +31,26 @@ def create_app():
         engineio_logger=False
     )
     
-    # Health check endpoint
     @app.route('/health')
     def health():
-        return {
-            'status': 'healthy',
-            'version': os.getenv('BUILD_VERSION', 'development')
-        }, 200
+        return {'status': 'healthy'}, 200
 
-    # Basic routes
     @app.route('/')
     def home():
-        return {
-            'status': 'running',
-            'environment': os.getenv('FLASK_ENV', 'production')
-        }, 200
+        return {'status': 'running'}, 200
     
-    # Graceful shutdown handler
-    def shutdown_handler(signum, frame):
-        socketio.stop()
-    
-    signal.signal(signal.SIGTERM, shutdown_handler)
-    
-    # Socket.IO events
     @socketio.on('connect')
     def handle_connect():
-        app.logger.info('Client connected')
+        logger.info('Client connected')
     
     @socketio.on('disconnect')
     def handle_disconnect():
-        app.logger.info('Client disconnected')
-    
-    # Error handlers
-    @app.errorhandler(404)
-    def not_found_error(error):
-        return {'error': 'Not Found'}, 404
-
-    @app.errorhandler(500)
-    def internal_error(error):
-        return {'error': 'Internal Server Error'}, 500
+        logger.info('Client disconnected')
     
     return app
 
-# Create application instance
+# Create app
 app = create_app()
 
 # WSGI application
 wsgi = app
-
-if __name__ == '__main__':
-    socketio = SocketIO(app)
-    socketio.run(app)
