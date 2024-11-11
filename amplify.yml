@@ -4,68 +4,27 @@ applications:
       phases:
         preBuild:
           commands:
+            # Basic setup
             - export FLASK_APP=wsgi.py
             - export FLASK_ENV=production
             - pip install --upgrade pip
+            # Core dependencies
             - pip install eventlet==0.37.0 Werkzeug==2.3.7 Flask==2.3.3 gunicorn==23.0.0
-            - |
-              cat << 'EOF' > start.sh
-              #!/bin/bash
-              set -e
-              
-              echo "Starting Gunicorn..."
-              
-              # Start Gunicorn and capture its PID
-              gunicorn \
-                --worker-class eventlet \
-                --workers 1 \
-                --bind 127.0.0.1:8000 \
-                --access-logfile access.log \
-                --error-logfile error.log \
-                --timeout 30 \
-                wsgi:wsgi &
-              
-              GUNICORN_PID=$!
-              echo "Gunicorn started with PID: $GUNICORN_PID"
-              
-              # Give it a moment to start
-              sleep 3
-              
-              # Try health check with timeout
-              echo "Testing health endpoint..."
-              RESPONSE=$(curl -s --max-time 5 http://127.0.0.1:8000/health)
-              CURL_STATUS=$?
-              
-              if [ $CURL_STATUS -eq 0 ] && [ "$(echo $RESPONSE | grep -c 'healthy')" -gt 0 ]; then
-                  echo "Health check successful: $RESPONSE"
-                  
-                  # Keep running in foreground
-                  tail -f access.log &
-                  TAIL_PID=$!
-                  
-                  # Wait for either process to exit
-                  wait -n $GUNICORN_PID $TAIL_PID
-                  exit 0
-              else
-                  echo "Health check failed with status $CURL_STATUS"
-                  if [ -f error.log ]; then
-                      echo "Error log contents:"
-                      cat error.log
-                  fi
-                  kill $GUNICORN_PID
-                  exit 1
-              fi
-              EOF
-            - chmod +x start.sh
         build:
           commands:
-            - ./start.sh
+            - echo "Starting Flask application"
+            # Run Gunicorn directly
+            - gunicorn wsgi:wsgi \
+              --worker-class eventlet \
+              --workers 1 \
+              --bind 0.0.0.0:8000 \
+              --log-level info \
+              --error-logfile - \
+              --access-logfile -
       artifacts:
         baseDirectory: .
         files:
           - '**/*'
-          - access.log
-          - error.log
       cache:
         paths:
           - /root/.cache/pip
