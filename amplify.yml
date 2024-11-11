@@ -14,25 +14,43 @@ applications:
               set -e
               
               echo "Starting Gunicorn..."
+              
+              # Start Gunicorn and capture its PID
               gunicorn \
                 --worker-class eventlet \
                 --workers 1 \
                 --bind 127.0.0.1:8000 \
                 --forwarded-allow-ips="*" \
-                --daemon \
-                --pid gunicorn.pid \
-                --access-logfile - \
-                --error-logfile - \
+                --access-logfile access.log \
+                --error-logfile error.log \
                 wsgi:wsgi &
               
+              GUNICORN_PID=$!
+              echo $GUNICORN_PID > gunicorn.pid
+              
+              echo "Gunicorn started with PID: $GUNICORN_PID"
               sleep 5
               
-              if kill -0 $(cat gunicorn.pid) 2>/dev/null; then
-                  echo "Gunicorn started successfully"
-                  curl -v http://localhost:8000/health
-                  exit 0
+              # Check if process is running and test endpoint
+              if ps -p $GUNICORN_PID > /dev/null; then
+                  echo "Testing health endpoint..."
+                  RESPONSE=$(curl -s http://127.0.0.1:8000/health)
+                  if [ $? -eq 0 ]; then
+                      echo "Health check successful: $RESPONSE"
+                      # Keep the process running
+                      wait $GUNICORN_PID
+                      exit 0
+                  else
+                      echo "Health check failed"
+                      kill $GUNICORN_PID
+                      exit 1
+                  fi
               else
-                  echo "Gunicorn failed to start"
+                  echo "Process failed to start"
+                  if [ -f error.log ]; then
+                      echo "Error log contents:"
+                      cat error.log
+                  fi
                   exit 1
               fi
               EOF
@@ -44,6 +62,8 @@ applications:
         baseDirectory: .
         files:
           - '**/*'
+          - error.log
+          - access.log
       cache:
         paths:
           - /root/.cache/pip
