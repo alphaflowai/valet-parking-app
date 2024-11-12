@@ -30,6 +30,8 @@ backend:
       --access-logfile - 
       --error-logfile - 
       --log-level debug 
+      --capture-output 
+      --enable-stdio-inheritance 
       wsgi:wsgi
   artifacts:
     baseDirectory: .
