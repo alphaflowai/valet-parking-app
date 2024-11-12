@@ -1,10 +1,23 @@
 # wsgi.py
 from app import create_app, socketio
 
-# Create the Flask application instance
 app = create_app()
 
-# Create the WSGI interface
+# Add a health check endpoint
+@app.route('/')
+def home():
+    return {
+        'status': 'ok',
+        'message': 'Flask server is running'
+    }
+
+@app.route('/health')
+def health():
+    return {
+        'status': 'healthy',
+        'service': 'valet-parking-app'
+    }
+
 wsgi = socketio.middleware(app)
 
 if __name__ == '__main__':

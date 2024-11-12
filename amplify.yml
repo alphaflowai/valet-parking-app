@@ -9,11 +9,21 @@ applications:
             - echo "PORT=8000" >> .env
             - echo "FLASK_APP=run.py" >> .env
             - echo "FLASK_ENV=production" >> .env
+            - echo "PYTHONUNBUFFERED=1" >> .env
         post_build:
           commands:
             - echo "Build completed successfully"
       start:
-        command: gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:8000 --timeout 120 wsgi:wsgi
+        command: >-
+          gunicorn 
+          --worker-class eventlet 
+          -w 1 
+          --bind 0.0.0.0:8000 
+          --timeout 120 
+          --access-logfile - 
+          --error-logfile - 
+          --log-level info 
+          wsgi:wsgi
       artifacts:
         baseDirectory: .
         files:
@@ -21,15 +31,6 @@ applications:
       cache:
         paths:
           - '/root/.cache/pip/**/*'
-    frontend:
-      phases:
-        build:
-          commands:
-            - echo "No frontend build required"
-      artifacts:
-        baseDirectory: .
-        files:
-          - '**/*'
     appRoot: .
     buildSpec:
       timeoutInMinutes: 10
