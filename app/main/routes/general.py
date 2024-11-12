@@ -6,6 +6,7 @@ from app.main.forms import UpdateProfileForm
 from werkzeug.security import check_password_hash
 from app.main.routes import bp
 
+@bp.route('/')
 def index():
     if current_user.is_authenticated:
         if current_user.role == 'admin':
@@ -16,7 +17,7 @@ def index():
             return redirect(url_for('main.valet_dashboard'))
         else:
             return redirect(url_for('main.customer_dashboard'))
-    return render_template('index.html')
+    return redirect(url_for('main.landing'))
 
 @login_required
 def user_profile():
@@ -38,9 +39,3 @@ def user_profile():
         form.email.data = current_user.email
         form.phone_number.data = current_user.phone_number
     return render_template('user_profile.html', title='User Profile', form=form)
-
-@bp.route('/landing')
-def landing():
-    if current_user.is_authenticated:
-        return redirect(url_for('main.index'))
-    return render_template('landing/index.html')
