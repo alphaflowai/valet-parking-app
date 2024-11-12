@@ -1,43 +1,70 @@
 # wsgi.py
-from flask import Flask, jsonify
-from app import create_app, socketio
+import sys
+import logging
+from flask import Flask, jsonify, request
 
-app = create_app()
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+)
+logger = logging.getLogger(__name__)
 
-# Basic route handlers
+try:
+    from app import create_app, socketio
+    logger.info("Successfully imported app modules")
+except Exception as e:
+    logger.error(f"Failed to import app modules: {str(e)}")
+    raise
+
+# Create application
+try:
+    app = create_app()
+    logger.info("Successfully created Flask application")
+except Exception as e:
+    logger.error(f"Failed to create Flask application: {str(e)}")
+    raise
+
+@app.before_request
+def log_request():
+    logger.debug(f"Request URL: {request.url}")
+    logger.debug(f"Request Method: {request.method}")
+    logger.debug(f"Request Headers: {dict(request.headers)}")
+
 @app.route('/', methods=['GET'])
 def index():
+    logger.info("Handling request to root endpoint")
     return jsonify({
         'status': 'ok',
-        'message': 'Valet Parking API Server'
+        'message': 'Valet Parking API Server',
+        'python_version': sys.version,
+        'debug': app.debug
     })
 
 @app.route('/health', methods=['GET'])
 def health():
+    logger.info("Handling request to health endpoint")
     return jsonify({
         'status': 'healthy',
         'service': 'valet-parking-app'
     })
 
-@app.route('/api', methods=['GET'])
-def api_root():
-    return jsonify({
-        'status': 'ok',
-        'version': '1.0',
-        'endpoints': ['/health', '/api']
-    })
-
-# Error handlers
 @app.errorhandler(404)
 def not_found(error):
-    return jsonify({'error': 'Not found', 'status': 404}), 404
-
-@app.errorhandler(500)
-def server_error(error):
-    return jsonify({'error': 'Internal server error', 'status': 500}), 500
+    logger.error(f"404 Error: {request.url}")
+    return jsonify({
+        'error': 'Not found',
+        'status': 404,
+        'path': request.path
+    }), 404
 
 # Create WSGI application
-wsgi = socketio.middleware(app)
+try:
+    wsgi = socketio.middleware(app)
+    logger.info("Successfully created WSGI middleware")
+except Exception as e:
+    logger.error(f"Failed to create WSGI middleware: {str(e)}")
+    raise
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=8000)

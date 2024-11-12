@@ -10,16 +10,15 @@ frontend:
       - '**/*'
 backend:
   phases:
-    preBuild:
+    build:
       commands:
         - pip install --upgrade pip
         - pip install -r requirements.txt
-    build:
-      commands:
         - echo "PORT=8000" >> .env
         - echo "FLASK_APP=wsgi.py" >> .env
         - echo "FLASK_ENV=production" >> .env
         - echo "PYTHONUNBUFFERED=1" >> .env
+        - echo "GUNICORN_CMD_ARGS='--log-level=debug'" >> .env
     post_build:
       commands:
         - echo "Build completed successfully"
@@ -31,6 +30,7 @@ backend:
       --bind 0.0.0.0:8000 
       --access-logfile - 
       --error-logfile - 
+      --capture-output
       --log-level debug 
       --timeout 120 
       wsgi:wsgi
@@ -38,6 +38,7 @@ backend:
     baseDirectory: .
     files:
       - '**/*'
+      - .env
   cache:
     paths:
       - '/root/.cache/pip/**/*'
