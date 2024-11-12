@@ -1,52 +1,42 @@
 # wsgi.py
-import logging
-from flask import Flask, request
+from flask import Flask, jsonify
 from app import create_app, socketio
-
-# Set up logging
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
-)
 
 app = create_app()
 
-@app.before_request
-def log_request_info():
-    app.logger.debug('Headers: %s', request.headers)
-    app.logger.debug('Body: %s', request.get_data())
-
-@app.after_request
-def log_response_info(response):
-    app.logger.debug('Response: %s', response.get_data())
-    return response
-
-@app.route('/')
-def home():
-    app.logger.info('Accessed home route')
-    return {
+# Basic route handlers
+@app.route('/', methods=['GET'])
+def index():
+    return jsonify({
         'status': 'ok',
-        'message': 'Flask server is running'
-    }
+        'message': 'Valet Parking API Server'
+    })
 
-@app.route('/health')
+@app.route('/health', methods=['GET'])
 def health():
-    app.logger.info('Health check requested')
-    return {
+    return jsonify({
         'status': 'healthy',
         'service': 'valet-parking-app'
-    }
+    })
 
+@app.route('/api', methods=['GET'])
+def api_root():
+    return jsonify({
+        'status': 'ok',
+        'version': '1.0',
+        'endpoints': ['/health', '/api']
+    })
+
+# Error handlers
 @app.errorhandler(404)
-def not_found_error(error):
-    app.logger.error('Page not found: %s', request.url)
-    return {'error': 'Not Found', 'url': request.url}, 404
+def not_found(error):
+    return jsonify({'error': 'Not found', 'status': 404}), 404
 
-@app.errorhandler(Exception)
-def internal_error(error):
-    app.logger.exception('An error occurred')
-    return {'error': str(error)}, 500
+@app.errorhandler(500)
+def server_error(error):
+    return jsonify({'error': 'Internal server error', 'status': 500}), 500
 
+# Create WSGI application
 wsgi = socketio.middleware(app)
 
 if __name__ == '__main__':

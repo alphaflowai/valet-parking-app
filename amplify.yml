@@ -10,10 +10,12 @@ frontend:
       - '**/*'
 backend:
   phases:
-    build:
+    preBuild:
       commands:
         - pip install --upgrade pip
         - pip install -r requirements.txt
+    build:
+      commands:
         - echo "PORT=8000" >> .env
         - echo "FLASK_APP=wsgi.py" >> .env
         - echo "FLASK_ENV=production" >> .env
@@ -23,15 +25,14 @@ backend:
         - echo "Build completed successfully"
   start:
     command: >-
-      gunicorn 
+      python -m gunicorn 
       --worker-class eventlet 
-      -w 1 
+      --workers 1 
       --bind 0.0.0.0:8000 
       --access-logfile - 
       --error-logfile - 
       --log-level debug 
-      --capture-output 
-      --enable-stdio-inheritance 
+      --timeout 120 
       wsgi:wsgi
   artifacts:
     baseDirectory: .
