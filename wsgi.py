@@ -1,10 +1,11 @@
 # wsgi.py
-from flask import Flask
+from app import create_app, socketio
 
-app = Flask(__name__)
+# Create the Flask application instance
+app = create_app()
 
-@app.route('/')
-def index():
-    return {'status': 'ok'}
+# Create the WSGI interface
+wsgi = socketio.middleware(app)
 
-wsgi = app
+if __name__ == '__main__':
+    socketio.run(app, host='0.0.0.0', port=8000)

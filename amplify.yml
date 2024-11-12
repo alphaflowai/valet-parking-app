@@ -6,27 +6,18 @@ applications:
           commands:
             - pip install --upgrade pip
             - pip install -r requirements.txt
+            - echo "PORT=8000" >> .env
+            - echo "FLASK_APP=run.py" >> .env
+            - echo "FLASK_ENV=production" >> .env
         post_build:
           commands:
             - echo "Build completed successfully"
       start:
-        command: >-
-          python -m gunicorn 
-          --worker-class eventlet 
-          -w 1 
-          --bind 0.0.0.0:8000 
-          wsgi:wsgi 
-          --access-logfile - 
-          --error-logfile - 
-          --log-level info
+        command: gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:8000 --timeout 120 wsgi:wsgi
       artifacts:
         baseDirectory: .
         files:
           - '**/*'
-          - requirements.txt
-          - wsgi.py
-          - run.py
-          - app/**/*
       cache:
         paths:
           - '/root/.cache/pip/**/*'
