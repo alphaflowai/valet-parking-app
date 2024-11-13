@@ -4,6 +4,7 @@ from app import db
 from app.models import User
 import stripe
 import os
+from sqlalchemy import text
 
 def register_commands(app):
     @app.cli.command('create-admin')
@@ -14,9 +15,10 @@ def register_commands(app):
     def create_admin(username, email, phone_number, password):
         with app.app_context():
             try:
-                db.session.execute('COMMIT')  # Ensure no transaction is pending
+                # Use text() for raw SQL
+                db.session.execute(text('COMMIT'))
                 
-                # Validate existing user
+                # Check if admin already exists
                 if User.query.filter_by(username=username).first():
                     click.echo('Error: Username already exists.')
                     return
@@ -24,16 +26,16 @@ def register_commands(app):
                     click.echo('Error: Email already exists.')
                     return
 
-                # Create new user
-                user = User(
+                # Create new admin user
+                admin = User(
                     username=username,
                     email=email,
-                    phone_number=str(phone_number),
+                    phone_number=phone_number,
                     role='admin'
                 )
-                user.set_password(password)
+                admin.set_password(password)
                 
-                db.session.add(user)
+                db.session.add(admin)
                 db.session.commit()
                 
                 click.echo(f'Admin user {username} created successfully!')
