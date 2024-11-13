@@ -31,9 +31,15 @@ class User(UserMixin, db.Model):
     
 
     def set_password(self, password):
+        if isinstance(password, memoryview):
+            password = password.tobytes().decode()
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
+        if self.password_hash is None:
+            return False
+        if isinstance(self.password_hash, memoryview):
+            self.password_hash = self.password_hash.tobytes().decode()
         return check_password_hash(self.password_hash, password)
 
     @property
