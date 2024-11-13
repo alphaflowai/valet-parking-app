@@ -91,11 +91,6 @@ except Exception as e:
     logger.error(f"Failed to register blueprints: {str(e)}")
     raise
 
-# Then add catch-all route
-@app.route('/<path:path>')
-def catch_all(path):
-    return render_template('index.html')
-
 # Create WSGI application
 try:
     wsgi = socketio.middleware(app)

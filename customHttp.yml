@@ -7,11 +7,14 @@ customHeaders:
         value: 'SAMEORIGIN'
 
 redirects:
-  - source: '/static/**'
-    target: '/static/:splat'
+  - source: '/<*>'
+    target: '/<*>'
     status: '200'
-  - source: '/api/**'
-    target: '/api/:splat'
+  - source: '/api/<*>'
+    target: '/api/<*>'
+    status: '200'
+  - source: '/socket.io/<*>'
+    target: '/socket.io/<*>'
     status: '200'
   - source: '/health'
     target: '/health'
