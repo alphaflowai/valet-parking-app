@@ -5,147 +5,19 @@ frontend:
       commands:
         - echo "No frontend build required"
   artifacts:
-    baseDirectory: /
+    baseDirectory: .
     files:
       - '**/*'
 backend:
   phases:
-    preBuild:
+    build:
       commands:
         - pip install --upgrade pip
         - pip install -r requirements.txt
-    build:
-      commands:
-        # Create Flask application structure
-        - mkdir -p app/templates
-        - mkdir -p app/static/css
-        - mkdir -p app/static/js
-        - mkdir -p app/static/images
-
-        # Copy base.html template
-        - |
-          cat > app/templates/base.html << 'EOL'
-          :::: {#pull-to-refresh-indicator .ptr-indicator}
-          []{.ptr-icon}
-
-          ::: ptr-text
-          Pull down to refresh
-          :::
-          ::::
-
-          {% if current_user.is_authenticated and not request.endpoint.endswith('customer_portal') %}
-            [Valet Parking]({{ url_for('main.index') }}){.navbar-brand}
-          {% endif %}
-
-          {% if request.endpoint.endswith('customer_portal') %}
-          ::::: {.navbar-nav .mx-auto}
-          {% endif %}
-
-          :::: theme-toggle-wrapper
-          ::: {#themeToggle .theme-toggle}
-          :::
-          ::::
-
-          {% if current_user.is_authenticated and not request.endpoint.endswith('customer_portal') %}
-          []{.navbar-toggler-icon}
-
-          :::: {#navbarNav .collapse .navbar-collapse}
-          - [Home]({{ url_for('main.index') }}){.nav-link}
-          - [Profile]({{ url_for('main.user_profile') }}){.nav-link}
-          {% if current_user.is_valet %}
-          - [Open Tickets]({{ url_for('main.valet_dashboard') }}){.nav-link}
-          - [Closed Tickets]({{ url_for('main.valet_dashboard', status='closed') }}){.nav-link}
-          {% endif %}
-          - [Logout]({{ url_for('main.logout') }}){.nav-link}
-          ::::
-          {% endif %}
-
-          ::::: dashboard-wrapper
-          :::: container-fluid
-          {% with messages = get_flashed_messages() %}
-            {% if messages %}
-            ::: {.alert .alert-info}
-            {% for message in messages %}
-            {{ message }}
-            {% endfor %}
-            :::
-            {% endif %}
-          {% endwith %}
-          {% block content %}{% endblock %}
-          ::::
-          :::::
-
-          {% block scripts %}
-          {% if current_user.is_authenticated %}
-          {% endif %}
-          {% block extra_js %}{% endblock %}
-          {% endblock %}
-          EOL
-
-        # Copy index.html template
-        - |
-          cat > app/templates/index.html << 'EOL'
-          {% extends "base.html" %}
-          {% block content %}
-          ::: logo-container
-          ![ValetFlow Logo]({{ url_for('static', filename='images/logo.svg') }}){.logo}
-          [ValetFlow]{.logo-text}
-          :::
-
-          :::: nav-links
-          [Features](#features)
-          [Pricing](#pricing)
-
-          ::: theme-toggle-wrapper
-          :::
-
-          [Sign In]({{ url_for('main.login') }}){.btn-signin}
-          ::::
-
-          ::::::: {.section .hero-section}
-          ::: hero-background
-          :::
-
-          ::::: container
-          :::: hero-content
-          # [Transform]{.gradient-text} Your [Valet Operations]{.gradient-text}
-          
-          Streamline your valet service with our intelligent management platform.
-          Boost efficiency and enhance customer experience.
-
-          ::: cta-buttons
-          [Start Now]({{ url_for('main.signup') }}){.btn-primary}
-          [Watch Demo](#demo){.btn-primary .btn-secondary}
-          :::
-          ::::
-          :::::
-          :::::::
-
-          <!-- Rest of index.html content -->
-          {% endblock %}
-          EOL
-
-        # Copy 404.html template
-        - |
-          cat > app/templates/404.html << 'EOL'
-          {% extends "base.html" %}
-          {% block content %}
-          ::: container
-          # 404 - Page Not Found
-
-          The page you're looking for doesn't exist.
-
-          [Go Home](/){.btn}
-          :::
-          {% endblock %}
-          EOL
-        
-        # Environment setup
         - echo "PORT=8000" >> .env
         - echo "FLASK_APP=wsgi.py" >> .env
         - echo "FLASK_ENV=production" >> .env
         - echo "PYTHONUNBUFFERED=1" >> .env
-        
     post_build:
       commands:
         - echo "Build completed successfully"
@@ -157,7 +29,7 @@ backend:
       --bind 0.0.0.0:8000 
       --access-logfile - 
       --error-logfile - 
-      --capture-output 
+      --capture-output
       --log-level debug 
       --timeout 120 
       wsgi:wsgi
@@ -165,6 +37,7 @@ backend:
     baseDirectory: .
     files:
       - '**/*'
+      - .env
   cache:
     paths:
       - '/root/.cache/pip/**/*'
