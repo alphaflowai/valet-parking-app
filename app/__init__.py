@@ -2,7 +2,7 @@
 from monkey import *
 
 # Now import everything else
-from flask import Flask, request, url_for, redirect, jsonify
+from flask import Flask, request, url_for, redirect, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
@@ -44,24 +44,18 @@ def create_app():
     login.init_app(app)
     migrate.init_app(app, db)
     socketio.init_app(app, cors_allowed_origins="*")
-    csrf.init_app(app)  # Ensure CSRF is initialized
+    csrf.init_app(app)
     limiter.init_app(app)
     mail.init_app(app)
     
-    # Register blueprints
+    # Register blueprints first
     from app.main import bp as main_bp
     app.register_blueprint(main_bp)
     
-    # Error handlers
-    @app.errorhandler(500)
-    def internal_error(error):
-        app.logger.error('Server Error: %s', error)
-        return jsonify(error=str(error)), 500
-
-    @app.errorhandler(Exception)
-    def handle_exception(e):
-        app.logger.error(f"Unhandled exception: {str(e)}")
-        return jsonify(error=str(e)), 500
+    # Then register error handlers
+    @app.errorhandler(404)
+    def not_found_error(error):
+        return render_template('404.html'), 404
 
     return app
 
