@@ -53,11 +53,12 @@ def log_request():
 def serve_static(filename):
     return send_from_directory(static_dir, filename)
 
+# Move this up after creating the app (around line 25)
+from app.cli import register_commands
+register_commands(app)
+
 # Create WSGI application
 wsgi = app.wsgi_app
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=8000)
-
-from app.cli import init_app
-init_app(app)
