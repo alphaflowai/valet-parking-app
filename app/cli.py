@@ -105,6 +105,35 @@ def register_commands(app):
                 click.echo(f'Error checking/creating admin: {str(e)}')
                 raise
 
+    @app.cli.command('check-duplicate-columns')
+    def check_duplicate_columns():
+        """Check for duplicate columns in all database tables"""
+        with app.app_context():
+            try:
+                # Get all table names
+                inspector = db.inspect(db.engine)
+                tables = inspector.get_table_names()
+                
+                found_duplicates = False
+                for table in tables:
+                    columns = inspector.get_columns(table)
+                    column_names = [col['name'] for col in columns]
+                    
+                    # Check for duplicates
+                    duplicates = set([x for x in column_names if column_names.count(x) > 1])
+                    
+                    if duplicates:
+                        found_duplicates = True
+                        click.echo(f"\nDuplicate columns found in table '{table}':")
+                        for dup in duplicates:
+                            click.echo(f"- Column '{dup}' appears {column_names.count(dup)} times")
+                
+                if not found_duplicates:
+                    click.echo("No duplicate columns found in any table.")
+                    
+            except Exception as e:
+                click.echo(f"Error checking duplicate columns: {str(e)}")
+
 @click.command('setup-stripe')
 @with_appcontext
 def setup_stripe_command():

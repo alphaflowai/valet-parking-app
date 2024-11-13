@@ -47,3 +47,7 @@ class Config:
         if not stripe.api_key:
             app.logger.error('Stripe secret key not set!')
             raise ValueError('Stripe secret key must be set')
+        SQLALCHEMY_ENGINE_OPTIONS = {
+    'pool_pre_ping': True,
+        'pool_recycle': 300,
+    } 
