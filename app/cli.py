@@ -14,6 +14,8 @@ def register_commands(app):
     def create_admin(username, email, phone_number, password):
         with app.app_context():
             try:
+                db.session.execute('COMMIT')  # Ensure no transaction is pending
+                
                 # Validate existing user
                 if User.query.filter_by(username=username).first():
                     click.echo('Error: Username already exists.')
@@ -31,15 +33,14 @@ def register_commands(app):
                 )
                 user.set_password(password)
                 
-                # Add and commit
                 db.session.add(user)
                 db.session.commit()
-                click.echo(f'Admin user {username} created successfully.')
+                
+                click.echo(f'Admin user {username} created successfully!')
                 
             except Exception as e:
                 db.session.rollback()
                 click.echo(f'Error creating admin user: {str(e)}')
-                raise
 
     @app.cli.command('create-manager')
     @click.argument('username')

@@ -12,6 +12,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.pool import QueuePool
 
 class User(UserMixin, db.Model):
+    __tablename__ = 'users'  # Change table name to avoid conflicts
+    
     id = db.Column(db.Integer, primary_key=True)
     first_name = db.Column(db.String(64))
     last_name = db.Column(db.String(64))
@@ -31,15 +33,15 @@ class User(UserMixin, db.Model):
     
 
     def set_password(self, password):
-        if isinstance(password, memoryview):
-            password = password.tobytes().decode()
+        if isinstance(password, (memoryview, bytes)):
+            password = password.decode('utf-8') if isinstance(password, bytes) else password.tobytes().decode('utf-8')
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
-        if self.password_hash is None:
+        if not self.password_hash:
             return False
-        if isinstance(self.password_hash, memoryview):
-            self.password_hash = self.password_hash.tobytes().decode()
+        if isinstance(self.password_hash, (memoryview, bytes)):
+            self.password_hash = self.password_hash.decode('utf-8') if isinstance(self.password_hash, bytes) else self.password_hash.tobytes().decode('utf-8')
         return check_password_hash(self.password_hash, password)
 
     @property
@@ -97,7 +99,7 @@ class User(UserMixin, db.Model):
 
 class StationManager(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     subscription_status = db.Column(db.String(20), default='active')
     subscription_end = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -111,7 +113,7 @@ class ValetStation(db.Model):
     name = db.Column(db.String(64))
     spaces = db.Column(db.String(500))  # Existing spaces field
     total_spaces = db.Column(db.Integer, default=0)  # New total_spaces field
-    valet_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    valet_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     valet = db.relationship('User', 
                           foreign_keys=[valet_id],
                           backref=db.backref('assigned_station', uselist=False))
@@ -151,7 +153,7 @@ class ValetStation(db.Model):
 
 class ValetAttendant(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     station_id = db.Column(db.Integer, db.ForeignKey('valet_station.id'))
     status = db.Column(db.String(20), default='active')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -161,8 +163,8 @@ class Session(db.Model):
     ticket_number = db.Column(db.String(50), unique=True, nullable=False, index=True)
     start_time = db.Column(db.DateTime, default=datetime.utcnow)
     end_time = db.Column(db.DateTime)
-    valet_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    customer_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    valet_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    customer_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     status = db.Column(db.String(20))
     car_requested = db.Column(db.Boolean, default=False)
     qr_code_customerPortal = db.Column(db.Text)

@@ -60,5 +60,20 @@ register_commands(app)
 # Create WSGI application
 wsgi = app.wsgi_app
 
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()  # Roll back any failed transaction
+    logger.error(f"Internal Server Error: {str(error)}")
+    return render_template('errors/500.html'), 500
+
+# Add connection error handling
+@app.before_request
+def before_request():
+    try:
+        db.session.ping()
+    except Exception:
+        db.session.rollback()
+        db.session.remove()
+
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=8000)
