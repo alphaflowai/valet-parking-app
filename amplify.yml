@@ -5,9 +5,10 @@ frontend:
       commands:
         - echo "No frontend build required"
   artifacts:
-    baseDirectory: .
+    baseDirectory: app
     files:
-      - '**/*'
+      - 'templates/**/*'
+      - 'static/**/*'
 backend:
   phases:
     build:
@@ -18,7 +19,7 @@ backend:
         - echo "FLASK_APP=wsgi.py" >> .env
         - echo "FLASK_ENV=production" >> .env
         - echo "PYTHONUNBUFFERED=1" >> .env
-        - echo "GUNICORN_CMD_ARGS='--log-level=debug'" >> .env
+        - echo "GUNICORN_CMD_ARGS='--worker-class eventlet --log-level debug'" >> .env
     post_build:
       commands:
         - echo "Build completed successfully"

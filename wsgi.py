@@ -37,21 +37,21 @@ def log_request():
     logger.debug(f"Request Headers: {dict(request.headers)}")
     logger.debug(f"Template Dir Exists: {os.path.exists(template_dir)}")
 
+# After imports and app creation, but before any routes
+try:
+    from app.main.routes import bp as main_bp
+    from app.auth.routes import bp as auth_bp
+    app.register_blueprint(main_bp)
+    app.register_blueprint(auth_bp)
+    logger.info("Successfully registered blueprints")
+except Exception as e:
+    logger.error(f"Failed to register blueprints: {str(e)}")
+    raise
+
+# Then define routes
 @app.route('/static/<path:filename>')
 def serve_static(filename):
     return send_from_directory(static_dir, filename)
-
-@app.route('/', methods=['GET'])
-def index():
-    logger.info("Handling request to root endpoint")
-    if request.headers.get('Accept', '').find('application/json') != -1:
-        return jsonify({
-            'status': 'ok',
-            'message': 'Valet Parking API Server',
-            'python_version': sys.version,
-            'debug': app.debug
-        })
-    return render_template('index.html')
 
 @app.route('/health', methods=['GET'])
 def health():
@@ -79,17 +79,6 @@ def not_found(error):
             'path': request.path
         }), 404
     return render_template('404.html'), 404
-
-# After create_app() but before route definitions
-try:
-    from app.main.routes import bp as main_bp
-    from app.auth.routes import bp as auth_bp
-    app.register_blueprint(main_bp)
-    app.register_blueprint(auth_bp)
-    logger.info("Successfully registered blueprints")
-except Exception as e:
-    logger.error(f"Failed to register blueprints: {str(e)}")
-    raise
 
 # Create WSGI application
 try:
