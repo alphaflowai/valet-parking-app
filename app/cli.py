@@ -32,14 +32,25 @@ def register_commands(app):
     @app.cli.command('create-manager')
     @click.argument('username')
     @click.argument('email')
-    @click.password_option()
-    def create_manager(username, email, password):
+    @click.argument('phone_number')
+    @click.option('--password', prompt=True, hide_input=True, confirmation_prompt=True)
+    def create_manager(username, email, phone_number, password):
         with app.app_context():
-            user = User(username=username, email=email, role='manager')
+            user = User.query.filter_by(username=username).first()
+            if user is not None:
+                click.echo('Error: Username already exists.')
+                return
+
+            user = User.query.filter_by(email=email).first()
+            if user is not None:
+                click.echo('Error: Email already exists.')
+                return
+
+            user = User(username=username, email=email, phone_number=phone_number, role='manager')
             user.set_password(password)
             db.session.add(user)
             db.session.commit()
-            click.echo(f'Manager user {username} created.')
+            click.echo(f'Manager user {username} created successfully.')
 
 @click.command('setup-stripe')
 @with_appcontext
@@ -99,8 +110,3 @@ def setup_stripe_command():
         
     except stripe.error.StripeError as e:
         click.echo(f"Error setting up Stripe: {str(e)}", err=True)
-
-def init_app(app):
-    app.cli.add_command(create_admin)
-    app.cli.add_command(create_manager)
-    app.cli.add_command(setup_stripe_command)
