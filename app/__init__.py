@@ -1,5 +1,9 @@
 # Import monkey patch first
-from monkey import *
+try:
+    from monkey import *
+except ImportError:
+    import eventlet
+    eventlet.monkey_patch()
 
 # Now import everything else
 from flask import Flask, request, url_for, redirect, jsonify, render_template
