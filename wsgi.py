@@ -80,6 +80,22 @@ def not_found(error):
         }), 404
     return render_template('404.html'), 404
 
+# After create_app() but before route definitions
+try:
+    from app.main.routes import bp as main_bp
+    from app.auth.routes import bp as auth_bp
+    app.register_blueprint(main_bp)
+    app.register_blueprint(auth_bp)
+    logger.info("Successfully registered blueprints")
+except Exception as e:
+    logger.error(f"Failed to register blueprints: {str(e)}")
+    raise
+
+# Then add catch-all route
+@app.route('/<path:path>')
+def catch_all(path):
+    return render_template('index.html')
+
 # Create WSGI application
 try:
     wsgi = socketio.middleware(app)

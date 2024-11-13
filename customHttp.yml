@@ -7,7 +7,12 @@ customHeaders:
         value: 'SAMEORIGIN'
 
 redirects:
-  - source: '/*'
-    target: '/index.html'
+  - source: '/static/**'
+    target: '/static/:splat'
     status: '200'
-    condition: 'NOT request.path MATCHES "\.(js|css|png|jpg|gif|svg|ico)$"'
+  - source: '/api/**'
+    target: '/api/:splat'
+    status: '200'
+  - source: '/health'
+    target: '/health'
+    status: '200'

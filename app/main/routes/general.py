@@ -19,6 +19,12 @@ def index():
             return redirect(url_for('main.customer_dashboard'))
     return redirect(url_for('main.landing'))
 
+@bp.route('/landing')
+def landing():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    return render_template('landing/index.html')
+
 @login_required
 def user_profile():
     form = UpdateProfileForm(current_user.username, current_user.email)

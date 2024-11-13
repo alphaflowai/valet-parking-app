@@ -5,9 +5,10 @@ frontend:
       commands:
         - echo "No frontend build required"
   artifacts:
-    baseDirectory: app/templates
+    baseDirectory: app
     files:
-      - '**/*'
+      - 'templates/**/*'
+      - 'static/**/*'
 backend:
   phases:
     build:
