@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect, url_for, request, jsonify
 from flask_login import login_required
 from app import db
 from app.main.routes import bp
-from app.models import User, Session
+from valet_parking_app.app.models import User, Session
 from app.main.forms import UserForm, CreateUserForm
 from app.main.routes.auth import admin_required
 from sqlalchemy import func

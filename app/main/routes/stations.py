@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request, current_app, url_for
 from flask_login import login_required, current_user
-from app.models import StationManager, ValetStation, ValetAttendant
+from valet_parking_app.app.models import StationManager, ValetStation, ValetAttendant
 from app.extensions import db, stripe
 
 bp = Blueprint('stations', __name__)

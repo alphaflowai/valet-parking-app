@@ -3,7 +3,7 @@ from flask import render_template, flash, redirect, url_for, request, abort, jso
 from flask_login import login_user, logout_user, current_user
 from app import db, csrf
 import stripe
-from app.models import User
+from valet_parking_app.app.models import User
 from app.main.forms import LoginForm, RegistrationForm, ResetPasswordRequestForm, ResetPasswordForm
 from app.main.routes import bp
 from urllib.parse import urlparse

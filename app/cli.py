@@ -1,7 +1,7 @@
 import click
 from flask.cli import with_appcontext
 from app import db
-from app.models import User
+from valet_parking_app.app.models import User
 import stripe
 import os
 from sqlalchemy import text

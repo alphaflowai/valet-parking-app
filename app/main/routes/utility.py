@@ -4,7 +4,7 @@ from flask_wtf.csrf import validate_csrf
 from wtforms import ValidationError
 from app import db, socketio
 from app.main.routes import bp
-from app.models import Session, ValetStation, CarDetails, User
+from valet_parking_app.app.models import Session, ValetStation, CarDetails, User
 from app.main.forms import ParkingSpaceForm, ConfirmRetrievalForm, DonationForm
 from app.main.routes.auth import valet_required
 import io

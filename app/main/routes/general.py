@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, url_for, request
 from flask_login import login_required, current_user
 from app import db
-from app.models import User
+from valet_parking_app.app.models import User
 from app.main.forms import UpdateProfileForm
 from werkzeug.security import check_password_hash
 from app.main.routes import bp

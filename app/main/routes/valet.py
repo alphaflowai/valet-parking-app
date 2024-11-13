@@ -21,7 +21,7 @@ from app.main.routes.utility import (
     update_session_status, get_time_parked, get_session_status, emit_parking_space_assigned, 
     emit_session_update, get_qr_code, get_qr_code_customer_portal, generate_payment_qr
 )
-from app.models import CarDetails, Session, ValetStation
+from valet_parking_app.app.models import CarDetails, Session, ValetStation
 from config import Config
 from twilio.rest import Client
 import traceback

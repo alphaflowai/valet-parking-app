@@ -2,7 +2,7 @@ from flask import current_app, render_template, flash, redirect, url_for, abort,
 from flask_login import current_user, login_required
 from app import db, socketio
 from app.main.routes import bp
-from app.models import Session
+from valet_parking_app.app.models import Session
 from datetime import datetime
 from flask_wtf import FlaskForm
 from flask import render_template

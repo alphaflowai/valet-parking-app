@@ -1,6 +1,6 @@
 from flask import render_template
 from flask_login import login_required, current_user
-from app.models import ValetStation
+from valet_parking_app.app.models import ValetStation
 from app.main.routes.auth import manager_required
 
 @bp.route('/manager/dashboard')

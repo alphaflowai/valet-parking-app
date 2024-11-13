@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, DateTimeField, TextAreaField, HiddenField, DecimalField
 from wtforms.validators import DataRequired, Email, EqualTo, ValidationError, Optional, Regexp, NumberRange
 from flask_wtf.file import FileField, FileAllowed
-from app.models import User, ValetStation, Session, CarDetails
+from valet_parking_app.app.models import User, ValetStation, Session, CarDetails
 from datetime import datetime
 from flask_login import current_user
 from app import db
