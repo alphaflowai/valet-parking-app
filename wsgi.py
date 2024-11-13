@@ -28,6 +28,13 @@ try:
         try:
             db.create_all()
             logger.info("Database tables created successfully")
+            
+            admin = User.query.filter_by(role='admin').first()
+            if admin:
+                logger.info(f"Admin user exists: {admin.username}")
+            else:
+                logger.warning("No admin user found. Please run 'flask create-admin' command.")
+                
         except Exception as e:
             logger.error(f"Database initialization error: {str(e)}")
 except Exception as e:
