@@ -13,21 +13,33 @@ def register_commands(app):
     @click.option('--password', prompt=True, hide_input=True, confirmation_prompt=True)
     def create_admin(username, email, phone_number, password):
         with app.app_context():
-            user = User.query.filter_by(username=username).first()
-            if user is not None:
-                click.echo('Error: Username already exists.')
-                return
+            try:
+                # Validate existing user
+                if User.query.filter_by(username=username).first():
+                    click.echo('Error: Username already exists.')
+                    return
+                if User.query.filter_by(email=email).first():
+                    click.echo('Error: Email already exists.')
+                    return
 
-            user = User.query.filter_by(email=email).first()
-            if user is not None:
-                click.echo('Error: Email already exists.')
-                return
-
-            user = User(username=username, email=email, phone_number=phone_number, role='admin')
-            user.set_password(password)
-            db.session.add(user)
-            db.session.commit()
-            click.echo(f'Admin user {username} created successfully.')
+                # Create new user
+                user = User(
+                    username=username,
+                    email=email,
+                    phone_number=str(phone_number),
+                    role='admin'
+                )
+                user.set_password(password)
+                
+                # Add and commit
+                db.session.add(user)
+                db.session.commit()
+                click.echo(f'Admin user {username} created successfully.')
+                
+            except Exception as e:
+                db.session.rollback()
+                click.echo(f'Error creating admin user: {str(e)}')
+                raise
 
     @app.cli.command('create-manager')
     @click.argument('username')
@@ -51,6 +63,44 @@ def register_commands(app):
             db.session.add(user)
             db.session.commit()
             click.echo(f'Manager user {username} created successfully.')
+
+    @app.cli.command('check-admin')
+    def check_admin():
+        """Check if admin exists, create one if not"""
+        with app.app_context():
+            try:
+                # Check for any admin user
+                admin = User.query.filter_by(role='admin').first()
+                
+                if admin:
+                    click.echo('Admin user exists:')
+                    click.echo(f'Username: {admin.username}')
+                    click.echo(f'Email: {admin.email}')
+                else:
+                    click.echo('No admin user found. Creating default admin...')
+                    
+                    # Create default admin
+                    admin = User(
+                        username='admin',
+                        email='sendtocomplete@gmail.com',
+                        phone_number='+1234567890',
+                        role='admin'
+                    )
+                    admin.set_password('admin123')  # Set a default password
+                    
+                    db.session.add(admin)
+                    db.session.commit()
+                    
+                    click.echo('Default admin created:')
+                    click.echo('Username: admin')
+                    click.echo('Email: sendtocomplete@gmail.com')
+                    click.echo('Password: admin123')
+                    click.echo('Please change the password after first login!')
+                    
+            except Exception as e:
+                db.session.rollback()
+                click.echo(f'Error checking/creating admin: {str(e)}')
+                raise
 
 @click.command('setup-stripe')
 @with_appcontext

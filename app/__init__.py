@@ -2,8 +2,8 @@
 try:
     from monkey import *
 except ImportError:
-    import eventlet
-    eventlet.monkey_patch()
+    from gevent import monkey
+    monkey.patch_all()
 
 # Now import everything else
 from flask import Flask, request, url_for, redirect, jsonify, render_template
@@ -29,7 +29,7 @@ db = SQLAlchemy()
 login = LoginManager()
 login.login_view = 'main.login'
 migrate = Migrate()
-socketio = SocketIO()
+socketio = SocketIO(async_mode='gevent')
 csrf = CSRFProtect()
 limiter = Limiter(key_func=get_remote_address)
 mail = Mail()
@@ -62,7 +62,3 @@ def create_app():
         return render_template('404.html'), 404
 
     return app
-
-
-
-
