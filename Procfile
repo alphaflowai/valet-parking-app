@@ -1,1 +1,1 @@
-web: gunicorn --worker-class eventlet -w 1 wsgi:wsgi
+web: cd valet_parking_app && gunicorn --worker-class eventlet -w 1 wsgi:wsgi
