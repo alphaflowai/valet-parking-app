@@ -134,6 +134,34 @@ def register_commands(app):
             except Exception as e:
                 click.echo(f"Error checking duplicate columns: {str(e)}")
 
+    @app.cli.command('check-db-status')
+    def check_db_status():
+        """Check database connection and tables status"""
+        with app.app_context():
+            try:
+                # Test database connection
+                db.session.execute(text('SELECT 1'))
+                click.echo('Database connection: OK')
+                
+                # Get all table names
+                inspector = db.inspect(db.engine)
+                tables = inspector.get_table_names()
+                
+                click.echo('\nExisting tables:')
+                for table in tables:
+                    # Count rows in each table
+                    result = db.session.execute(text(f'SELECT COUNT(*) FROM {table}'))
+                    count = result.scalar()
+                    click.echo(f'- {table}: {count} rows')
+                
+                # Check admin users
+                admin_count = User.query.filter_by(role='admin').count()
+                click.echo(f'\nAdmin users: {admin_count}')
+                
+            except Exception as e:
+                click.echo(f'Error checking database status: {str(e)}')
+                raise
+
 @click.command('setup-stripe')
 @with_appcontext
 def setup_stripe_command():
