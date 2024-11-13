@@ -1,45 +1,45 @@
 import click
 from flask.cli import with_appcontext
-from app.__init__ import db
+from app import db
 from app.models import User
 import stripe
-import time
 import os
 
-@click.command('create-admin')
-@click.argument('username')
-@click.argument('email')
-@click.argument('phone_number')
-@click.option('--password', prompt=True, hide_input=True, confirmation_prompt=True)
-@with_appcontext
-def create_admin(username, email, phone_number, password):
-    user = User.query.filter_by(username=username).first()
-    if user is not None:
-        click.echo('Error: Username already exists.')
-        return
+def register_commands(app):
+    @app.cli.command('create-admin')
+    @click.argument('username')
+    @click.argument('email')
+    @click.argument('phone_number')
+    @click.option('--password', prompt=True, hide_input=True, confirmation_prompt=True)
+    def create_admin(username, email, phone_number, password):
+        with app.app_context():
+            user = User.query.filter_by(username=username).first()
+            if user is not None:
+                click.echo('Error: Username already exists.')
+                return
 
-    user = User.query.filter_by(email=email).first()
-    if user is not None:
-        click.echo('Error: Email already exists.')
-        return
+            user = User.query.filter_by(email=email).first()
+            if user is not None:
+                click.echo('Error: Email already exists.')
+                return
 
-    user = User(username=username, email=email, phone_number=phone_number, role='admin')
-    user.set_password(password)
-    db.session.add(user)
-    db.session.commit()
-    click.echo(f'Admin user {username} created successfully.')
+            user = User(username=username, email=email, phone_number=phone_number, role='admin')
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+            click.echo(f'Admin user {username} created successfully.')
 
-@click.command('create-manager')
-@click.argument('username')
-@click.argument('email')
-@click.password_option()
-@with_appcontext
-def create_manager(username, email, password):
-    user = User(username=username, email=email, role='manager')
-    user.set_password(password)
-    db.session.add(user)
-    db.session.commit()
-    click.echo(f'Manager user {username} created.')
+    @app.cli.command('create-manager')
+    @click.argument('username')
+    @click.argument('email')
+    @click.password_option()
+    def create_manager(username, email, password):
+        with app.app_context():
+            user = User(username=username, email=email, role='manager')
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+            click.echo(f'Manager user {username} created.')
 
 @click.command('setup-stripe')
 @with_appcontext
